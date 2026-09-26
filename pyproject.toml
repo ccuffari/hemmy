@@ -6,52 +6,60 @@ readme = "README.md"
 requires-python = ">=3.10"
 
 dependencies = [
+    # Limite superiore su OGNI dipendenza (mai solo ">="): un rebuild senza pin
+    # ha preso fastapi/starlette molto più recenti da un giorno all'altro
+    # (0.104->0.141) e ha rotto la risoluzione dei parametri Request nelle
+    # route — scoperto in produzione, non nei test locali. Limiti scelti sulla
+    # combinazione di versioni verificata (244/244 test) il 2026-09-26.
+    #
     # LLM client - DeepSeek/OpenAI/Gemini/Llama/self-hosted espongono API
     # compatibili OpenAI; Anthropic Claude usa il proprio SDK (BYOK multi-provider,
     # vedi core/llm_providers.py).
-    "openai>=1.0.0",
-    "anthropic>=0.34.0",
-    "python-dotenv>=1.0.0",
+    "openai>=3.19.0,<4.0.0",
+    "anthropic>=1.8.0,<2.0.0",
+    "python-dotenv>=1.2.0,<2.0.0",
     # Azure - autenticazione e SDK (accesso in sola lettura)
-    "azure-identity>=1.15.0",
-    "msal>=1.28.0",  # login OAuth per-utente Azure (redirect al portale Microsoft)
-    "azure-mgmt-datafactory>=6.0.0",
-    "azure-mgmt-storage>=21.0.0",
-    "azure-mgmt-sql>=3.0.1",
+    "azure-identity>=1.25.0,<2.0.0",
+    "msal>=1.39.0,<2.0.0",  # login OAuth per-utente Azure (redirect al portale Microsoft)
+    "azure-mgmt-datafactory>=10.0.0,<11.0.0",
+    "azure-mgmt-storage>=25.0.0,<26.0.0",
+    "azure-mgmt-sql>=4.0.0,<5.0.0",
     # <24: dalla 24 il rollup non include più il client Management Lock (locks).
     "azure-mgmt-resource>=23.0.0,<24.0.0",
-    "azure-mgmt-keyvault>=10.3.0",
-    "azure-keyvault-secrets>=4.7.0",
-    "azure-mgmt-authorization>=4.0.0",
-    "azure-mgmt-network>=25.0.0",
-    "azure-storage-blob>=12.19.0",
-    "azure-data-tables>=12.4.0",
-    "azure-storage-queue>=12.9.0",
-    "azure-storage-file-share>=12.14.0",
-    "pyodbc>=5.0.0",
+    "azure-mgmt-keyvault>=14.0.0,<15.0.0",
+    "azure-keyvault-secrets>=4.11.0,<5.0.0",
+    "azure-mgmt-authorization>=4.0.0,<5.0.0",
+    "azure-mgmt-network>=33.0.0,<34.0.0",
+    "azure-storage-blob>=12.30.0,<13.0.0",
+    "azure-data-tables>=12.7.0,<13.0.0",
+    "azure-storage-queue>=12.17.0,<13.0.0",
+    "azure-storage-file-share>=12.26.0,<13.0.0",
+    "pyodbc>=5.3.0,<6.0.0",
     # Cifratura dei GitHub Actions secrets (sealed box)
-    "pynacl>=1.5.0",
-    # UI web locale (FastAPI + browser) — interfaccia di prima classe
-    "fastapi>=0.110.0",
-    "uvicorn>=0.29.0",
+    "pynacl>=1.6.0,<2.0.0",
+    # UI web locale (FastAPI + browser) — interfaccia di prima classe.
+    # fastapi/uvicorn sono 0.x: per semver un bump di MINOR può rompere
+    # (già successo), quindi qui il tetto è stretto (solo patch).
+    "fastapi>=0.141.0,<0.142.0",
+    "uvicorn>=0.54.0,<0.55.0",
     # Config
-    "pyyaml>=6.0",
+    "pyyaml>=6.0.0,<7.0.0",
     # Persistenza multi-utente su Supabase (Postgres + Auth), opzionale: se
     # SUPABASE_URL non è impostata l'app ripiega su SQLite locale.
-    "supabase>=2.4.0",
-    "pyjwt>=2.8.0",
+    "supabase>=2.31.0,<3.0.0",
+    "pyjwt>=2.15.0,<3.0.0",
     # OAuth per-utente verso AWS (IAM Identity Center / SSO OIDC Device Flow):
     # solo `sso-oidc`/`sso` (RegisterClient/StartDeviceAuthorization/CreateToken/
     # GetRoleCredentials), chiamate non firmate SigV4 — nessuna chiave AWS statica
     # richiesta per usare boto3 in questo modo. Vedi auth/oauth_providers.py.
-    "boto3>=1.34.0",
+    "boto3>=1.43.0,<2.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.0.0",
+    "pytest>=9.1.0,<10.0.0",
 ]
-sql-driver = ["pyodbc>=5.0.0"]
+sql-driver = ["pyodbc>=5.3.0,<6.0.0"]
 
 [project.scripts]
 hemmy = "hemmy.__main__:main"

@@ -3,7 +3,20 @@
 # trigger creati dalla Console con "Continuously deploy" usano Buildpacks di
 # default, che non installano il driver ODBC richiesto dai tool sql.*/
 # dataquality.*/mdm.* — per questo qui il Dockerfile è esplicito.
+#
+# GATE: se i test falliscono, questo step esce con codice diverso da 0 e
+# Cloud Build interrompe la pipeline PRIMA di build/push/deploy — nessun
+# commit che rompe i test arriva mai in produzione.
 steps:
+  - name: python:3.11-slim
+    id: Test
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        pip install --no-cache-dir -e ".[dev]"
+        python -m pytest -q
   - name: gcr.io/cloud-builders/docker
     args:
       - build
