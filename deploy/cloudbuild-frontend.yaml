@@ -1,0 +1,32 @@
+# Cloud Build config per il deploy continuo del FRONTEND, agganciato al
+# trigger GitHub (push su main). Build via frontend/Dockerfile.
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/hemmy-frontend:$COMMIT_SHA
+      - -f
+      - frontend/Dockerfile
+      - frontend
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/hemmy-frontend:$COMMIT_SHA
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - services
+      - update
+      - hemmy-frontend
+      - --platform=managed
+      - --region=europe-west1
+      - --image=europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/hemmy-frontend:$COMMIT_SHA
+      - --quiet
+
+images:
+  - europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/hemmy-frontend:$COMMIT_SHA
+
+options:
+  logging: CLOUD_LOGGING_ONLY

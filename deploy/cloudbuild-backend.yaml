@@ -1,0 +1,35 @@
+# Cloud Build config per il deploy continuo del BACKEND, agganciato al trigger
+# GitHub (push su main). Build via Dockerfile (root), non Buildpacks: i
+# trigger creati dalla Console con "Continuously deploy" usano Buildpacks di
+# default, che non installano il driver ODBC richiesto dai tool sql.*/
+# dataquality.*/mdm.* — per questo qui il Dockerfile è esplicito.
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/hemmy-backend:$COMMIT_SHA
+      - -f
+      - Dockerfile
+      - .
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/hemmy-backend:$COMMIT_SHA
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - services
+      - update
+      - hemmy-backend
+      - --platform=managed
+      - --region=europe-west1
+      - --image=europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/hemmy-backend:$COMMIT_SHA
+      - --quiet
+
+images:
+  - europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/hemmy-backend:$COMMIT_SHA
+
+options:
+  logging: CLOUD_LOGGING_ONLY
