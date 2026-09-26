@@ -24,14 +24,21 @@ window.HEMMY_SUPABASE = window.supabase.createClient(
   }
 );
 
-// --- 2. Backend Python/Flask ---
-// In locale punta a Flask dev.
-// In produzione: sostituisci con l'URL Cloud Run o con "/api" se usi Firebase rewrites.
+// --- 2. Backend FastAPI ---
+// Frontend e backend sono DUE servizi Cloud Run separati (URL diversi): non
+// basta location.origin. Mappa esplicita per ogni ambiente noto (prod, dev),
+// così lo stesso file serve invariato su entrambi i branch/deploy — niente
+// script inline per-ambiente da tenere sincronizzati a mano nell'HTML.
 window.HEMMY_API_BASE = window.HEMMY_API_BASE || (() => {
   const h = location.hostname;
   if (h === "localhost" || h === "127.0.0.1") return "http://127.0.0.1:8765";
-  // URL assoluto sul dominio corrente, senza path: funziona
-  // indipendentemente da dove è servita la pagina (/ o /index.html).
+  const BACKEND_BY_FRONTEND_HOST = {
+    "portal.hemmy.it": "https://hemmy-backend-zjrvfn2m7a-ew.a.run.app",
+    "hemmy-frontend-zjrvfn2m7a-ew.a.run.app": "https://hemmy-backend-zjrvfn2m7a-ew.a.run.app",
+    "hemmy-frontend-dev-zjrvfn2m7a-ew.a.run.app": "https://hemmy-backend-dev-zjrvfn2m7a-ew.a.run.app",
+  };
+  if (BACKEND_BY_FRONTEND_HOST[h]) return BACKEND_BY_FRONTEND_HOST[h];
+  // Fallback: stesso host (utile se un giorno backend/frontend condividono dominio).
   return location.origin;
 })();
 

@@ -11,11 +11,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Backend su servizio Cloud Run separato dal frontend (URL diverso):
-       senza questo, config.js userebbe location.origin, cioè punterebbe al
-       frontend stesso. Da aggiornare se si mappa un dominio custom. -->
-  <script>window.HEMMY_API_BASE = "https://hemmy-backend-zjrvfn2m7a-ew.a.run.app";</script>
   <script src="config.js"></script>
+  <script src="legal-banner.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <style>
     :root {
@@ -4524,6 +4521,21 @@
         + '</div>'
         + '<div class="set-empty" style="margin-top:6px">'
         + 'Altri orchestratori (Prefect, Dagster, Temporal, …) saranno disponibili prossimamente.'
+        + '</div>'
+        + '</div>'
+
+        + '<div class="set-section">'
+        + '<div class="set-section-hd">'
+        + '<div class="ic">📄</div>'
+        + '<div class="ttl"><h4>Legale</h4>'
+        + '<p>Informativa privacy, termini di servizio, cookie e contatti.</p>'
+        + '</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:10px;flex-wrap:wrap">'
+        + '<a href="privacy.html" target="_blank" rel="noopener"><button type="button">Privacy</button></a>'
+        + '<a href="termini.html" target="_blank" rel="noopener"><button type="button">Termini e Condizioni</button></a>'
+        + '<a href="cookie.html" target="_blank" rel="noopener"><button type="button">Cookie Policy</button></a>'
+        + '<a href="contatti.html" target="_blank" rel="noopener"><button type="button">Contatti</button></a>'
         + '</div>'
         + '</div>';
 

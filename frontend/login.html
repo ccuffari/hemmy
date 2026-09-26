@@ -653,12 +653,24 @@
           <input id="p" name="password" type="password" autocomplete="current-password" required minlength="8"
             placeholder="••••••••" />
 
+          <div id="consentField" class="hidden" style="margin-top:16px;display:flex;gap:8px;align-items:flex-start;">
+            <input type="checkbox" id="consent" style="width:auto;margin-top:3px;flex:0 0 auto;">
+            <label for="consent" style="margin:0;font-size:12px;color:var(--muted);font-weight:400;line-height:1.5;">
+              Ho letto e accetto i <a href="termini.html" target="_blank" rel="noopener">Termini e Condizioni</a>
+              e l'<a href="privacy.html" target="_blank" rel="noopener">Informativa Privacy</a>. <span class="req">*</span>
+            </label>
+          </div>
+
           <button class="submit" id="submitBtn" type="submit">Accedi</button>
           <div class="msg" id="msg"></div>
         </form>
 
         <div class="form-foot">
           <a href="https://hemmy.it" target="_blank" rel="noopener">← Torna al sito</a>
+          <div class="form-hint">
+            <a href="privacy.html">Privacy</a> · <a href="termini.html">Termini</a> ·
+            <a href="cookie.html">Cookie</a> · <a href="contatti.html">Contatti</a>
+          </div>
         </div>
 
       </div>
@@ -735,6 +747,9 @@
         <div class="showcase-foot">
           <span>© 2025 Hemmy</span>
           <a href="mailto:info@hemmy.it">info@hemmy.it</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="termini.html">Termini</a>
+          <a href="cookie.html">Cookie</a>
         </div>
 
       </div>
@@ -743,11 +758,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Backend su servizio Cloud Run separato dal frontend (URL diverso):
-       senza questo, config.js userebbe location.origin, cioè punterebbe al
-       frontend stesso. Da aggiornare se si mappa un dominio custom. -->
-  <script>window.HEMMY_API_BASE = "https://hemmy-backend-zjrvfn2m7a-ew.a.run.app";</script>
   <script src="config.js"></script>
+  <script src="legal-banner.js"></script>
   <script>
     /* ============================================================
        Rifiniture client-side (IGIENE, non sicurezza)
@@ -842,6 +854,8 @@
     const emailInput = document.getElementById("e");
     const pwd = document.getElementById("p");
     const msgBox = document.getElementById("msg");
+    const consentField = document.getElementById("consentField");
+    const consentInput = document.getElementById("consent");
 
     function showMsg(text, kind) {
       msgBox.className = "msg " + (kind || "");
@@ -859,6 +873,9 @@
       usernameInput.required = m === "register";
       nomeInput.required = m === "register";
       cognomeInput.required = m === "register";
+      consentField.classList.toggle("hidden", m !== "register");
+      consentInput.required = m === "register";
+      if (m !== "register") consentInput.checked = false;
       clearMsg();
     }
     tabLogin.onclick = () => setMode("login");
@@ -927,6 +944,11 @@
         if (!isValidPassword(password)) {
           showMsg("La password deve avere almeno 8 caratteri, con almeno una lettera e un numero.", "err");
           pwd.focus();
+          return;
+        }
+        if (!consentInput.checked) {
+          showMsg("Devi accettare Termini e Condizioni e Informativa Privacy per creare un account.", "err");
+          consentInput.focus();
           return;
         }
 
