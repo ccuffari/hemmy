@@ -379,8 +379,12 @@ def _current_user(request: Any) -> dict[str, Any] | None:
     role_source = "jwt"
 
     try:
-        from hemmy.db.supabase_client import get_service_client
-        sb = get_service_client()
+        # NOTA: era `get_service_client` (non esiste, mai esistito con questo
+        # nome) — ImportError silenzioso ad ogni richiesta, mascherato dal
+        # fallback sotto (role dal JWT). Bug pre-esistente al rename, mai
+        # emerso in locale/CLI a singolo processo.
+        from hemmy.db.supabase_client import get_admin_client
+        sb = get_admin_client()
         prof = (
             sb.table("profiles")
             .select("username, role")
