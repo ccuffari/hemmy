@@ -1,0 +1,28 @@
+name: Terraform
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "Comando Terraform"
+        required: true
+        default: plan
+        type: choice
+        options: [init, validate, plan, apply, destroy]
+permissions:
+  contents: read
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init -input=false
+      - run: terraform ${{ inputs.command }} -input=false ${{ (inputs.command == 'apply' || inputs.command == 'destroy') && '-auto-approve' || '' }}

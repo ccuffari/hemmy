@@ -1,0 +1,14 @@
+# Configurazione LLM dell'agente ADF
+# DeepSeek espone un'API compatibile con OpenAI.
+
+provider: deepseek
+model: deepseek-chat
+base_url: https://api.deepseek.com
+
+# Parametri di generazione
+temperature: 0.1        # bassa = risposte deterministiche, adatte alla diagnostica
+max_iterations: 60      # numero massimo di cicli ReAct (Thought -> Action -> Observation)
+timeout: 120            # timeout in secondi per singola chiamata LLM
+max_retries: 3          # ritentativi su timeout/connessione/rate limit
+max_history: 120        # messaggi conservati tra i turni (finestra scorrevole ampia:
+                        # evita di perdere fatti vecchi — RG/subscription — in deploy multi-fase)

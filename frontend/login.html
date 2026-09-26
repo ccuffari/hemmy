@@ -1,0 +1,1027 @@
+<!doctype html>
+<html lang="it">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hemmy — Accedi</title>
+  <link rel="icon" type="image/png" href="img/hemmy.png">
+  <link rel="apple-touch-icon" href="img/hemmy.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0b10;
+      --bg-2: #0d0f16;
+      --panel: #12141c;
+      --panel2: #181b26;
+      --panel3: #20232f;
+      --border: #232635;
+      --border-soft: #1b1e29;
+      --txt: #eef0f6;
+      --txt-dim: #c2c7d6;
+      --muted: #838b9c;
+      --accent: #6d5bf0;
+      --accent-2: #4f8cff;
+      --accent-soft: rgba(109, 91, 240, .16);
+      --ok: #22c55e;
+      --err: #f5576c;
+      --grad: linear-gradient(135deg, var(--accent), var(--accent-2));
+
+      --navy-900: #050b18;
+      --navy-800: #081326;
+      --navy-700: #0b1a33;
+      --blue-500: #0A84FF;
+      --blue-400: #3B9EFF;
+      --blue-300: #7EB6F0;
+      --blue-200: #A8CBFF;
+      --line-blue: rgba(120, 170, 255, .14);
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0
+    }
+
+    body {
+      color: var(--txt);
+      font: 14px/1.55 "Inter", -apple-system, Segoe UI, Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: var(--bg);
+      overflow-x: hidden;
+    }
+
+    .auth-shell {
+      display: grid;
+      grid-template-columns: 1fr 1.05fr;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+
+    /* ============================================================
+       LATO FORM
+       ============================================================ */
+    .form-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      background:
+        radial-gradient(700px 400px at 10% 0%, rgba(109, 91, 240, .10), transparent 60%),
+        radial-gradient(600px 400px at 90% 100%, rgba(79, 140, 255, .06), transparent 60%),
+        var(--bg);
+      position: relative;
+    }
+
+    .form-wrap {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 26px;
+    }
+
+    .brand img {
+      width: 52px;
+      height: 52px;
+      border-radius: 13px;
+      box-shadow: 0 0 0 1px var(--border);
+    }
+
+    .brand h1 {
+      font-family: 'Inter', sans-serif;
+      font-size: 20px;
+      margin: 0;
+      font-weight: 800;
+      letter-spacing: .1px;
+    }
+
+    .brand p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+
+    .brand-mobile {
+      display: none
+    }
+
+    .tabs {
+      display: flex;
+      gap: 3px;
+      margin-bottom: 18px;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+    }
+
+    .tabs button {
+      flex: 1;
+      padding: 9px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      font-family: inherit;
+    }
+
+    .tabs button:hover {
+      color: var(--txt)
+    }
+
+    .tabs button.active {
+      background: var(--grad);
+      color: #fff;
+      box-shadow: 0 4px 14px -4px rgba(109, 91, 240, .55);
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 14px 0 5px;
+      font-weight: 500;
+    }
+
+    label .req {
+      color: var(--accent-2);
+      margin-left: 2px;
+    }
+
+    label .opt {
+      color: var(--muted);
+      font-weight: 400;
+      margin-left: 2px;
+      font-size: 11px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--panel2);
+      color: var(--txt);
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    input::placeholder {
+      color: var(--muted)
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    input:invalid:not(:placeholder-shown) {
+      border-color: rgba(245, 87, 108, .5);
+    }
+
+    /* Riga Nome + Cognome affiancati */
+    .name-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .name-row>div {
+      min-width: 0
+    }
+
+    button.submit {
+      width: 100%;
+      margin-top: 20px;
+      padding: 11px;
+      border: 0;
+      border-radius: 11px;
+      background: var(--grad);
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 6px 18px -6px rgba(109, 91, 240, .6);
+      transition: filter .15s, transform .05s;
+      font-family: inherit;
+    }
+
+    button.submit:hover {
+      filter: brightness(1.07)
+    }
+
+    button.submit:active {
+      transform: scale(.99)
+    }
+
+    button.submit:disabled {
+      opacity: .55;
+      cursor: default;
+      filter: none
+    }
+
+    .msg {
+      margin-top: 12px;
+      font-size: 12.5px;
+      min-height: 14px;
+      line-height: 1.5;
+    }
+
+    .msg.err {
+      color: var(--err)
+    }
+
+    .msg.ok {
+      color: var(--ok)
+    }
+
+    .hidden {
+      display: none !important
+    }
+
+    .form-foot {
+      margin-top: 26px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .form-foot a {
+      color: var(--txt-dim);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(194, 199, 214, .2);
+      transition: color .15s, border-color .15s;
+    }
+
+    .form-foot a:hover {
+      color: var(--txt);
+      border-color: var(--accent-2);
+    }
+
+    .form-hint {
+      margin-top: 6px;
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ============================================================
+       LATO VETRINA
+       ============================================================ */
+    .showcase {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(900px 600px at 78% -8%, rgba(10, 132, 255, .22), transparent 60%),
+        radial-gradient(700px 500px at 8% 18%, rgba(59, 158, 255, .10), transparent 60%),
+        radial-gradient(900px 700px at 50% 120%, rgba(10, 132, 255, .14), transparent 60%),
+        var(--navy-900);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px clamp(32px, 5vw, 72px);
+      border-left: 1px solid var(--line-blue);
+    }
+
+    .showcase::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: .35;
+      background-image:
+        linear-gradient(rgba(120, 170, 255, .055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(120, 170, 255, .055) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(ellipse 100% 70% at 50% 0%, #000 30%, transparent 80%);
+    }
+
+    .showcase-inner {
+      position: relative;
+      max-width: 520px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 34px;
+    }
+
+    .showcase h2 {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      font-size: clamp(2rem, 3.6vw, 2.9rem);
+      font-weight: 700;
+      line-height: 1.08;
+      letter-spacing: -.02em;
+      color: #F5F9FF;
+      margin: 0;
+    }
+
+    .showcase h2 .grad {
+      background: linear-gradient(120deg, var(--blue-300), var(--blue-500) 55%, var(--blue-200));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .showcase .lead {
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #8FA6C8;
+      margin: 0;
+      max-width: 460px;
+    }
+
+    .props {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: -4px;
+    }
+
+    .prop {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: .93rem;
+      color: #c9d8ee;
+    }
+
+    .prop svg {
+      flex: none;
+      width: 18px;
+      height: 18px;
+      stroke: var(--blue-400);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .prop strong {
+      color: #F5F9FF;
+      font-weight: 600
+    }
+
+    .term {
+      border-radius: 14px;
+      border: 1px solid var(--line-blue);
+      background: linear-gradient(180deg, rgba(18, 37, 68, .55), rgba(8, 19, 38, .75));
+      box-shadow: 0 30px 70px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .04);
+      overflow: hidden;
+    }
+
+    .term-head {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--line-blue);
+      background: rgba(5, 11, 24, .55);
+    }
+
+    .term-head .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(120, 170, 255, .25);
+      flex: none;
+    }
+
+    .term-head .dot.r {
+      background: rgba(245, 87, 108, .55)
+    }
+
+    .term-head .dot.y {
+      background: rgba(251, 191, 36, .55)
+    }
+
+    .term-head .dot.g {
+      background: rgba(74, 222, 128, .55)
+    }
+
+    .term-title {
+      margin-left: 8px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: .72rem;
+      color: #8FA6C8;
+    }
+
+    .term-body {
+      padding: 16px 18px 18px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: .82rem;
+      line-height: 1.75;
+      color: #c9d8ee;
+    }
+
+    .term-line {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .term-line+.term-line {
+      margin-top: 4px
+    }
+
+    .term-line .prompt {
+      color: var(--blue-400);
+      flex: none
+    }
+
+    .term-line .ok {
+      color: #4ade80;
+      flex: none
+    }
+
+    .term-line .warn {
+      color: #fbbf24;
+      flex: none
+    }
+
+    .term-line .cmd {
+      color: #F5F9FF
+    }
+
+    .term-line .c {
+      color: var(--blue-200)
+    }
+
+    .term-line .num {
+      color: #4ade80
+    }
+
+    .term-line .err {
+      color: #f87171
+    }
+
+    .term-line .dim {
+      color: #6b7a92
+    }
+
+    .term-line.ask {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(120, 170, 255, .18);
+    }
+
+    .term-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      margin-left: 4px;
+      background: var(--blue-400);
+      vertical-align: -2px;
+      animation: blink 1.1s steps(2, start) infinite;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0
+      }
+    }
+
+    .showcase-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: .78rem;
+      color: #6b7a92;
+      padding-top: 8px;
+    }
+
+    .showcase-foot a {
+      color: #8FA6C8;
+      text-decoration: none;
+      transition: color .15s
+    }
+
+    .showcase-foot a:hover {
+      color: #F5F9FF
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 980px) {
+      .auth-shell {
+        grid-template-columns: 1fr
+      }
+
+      .showcase {
+        display: none
+      }
+
+      .form-panel {
+        padding: 40px 20px
+      }
+
+      .brand {
+        display: none
+      }
+
+      .brand-mobile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 22px;
+      }
+
+      .brand-mobile img {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        box-shadow: 0 0 0 1px var(--border);
+      }
+
+      .brand-mobile h1 {
+        font-size: 19px;
+        margin: 0;
+        font-weight: 800
+      }
+
+      .brand-mobile p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px
+      }
+    }
+
+    @media (max-width: 480px) {
+      .name-row {
+        grid-template-columns: 1fr;
+        gap: 0
+      }
+    }
+
+    @media (max-width: 379.98px) {
+      .form-panel {
+        padding: 28px 16px
+      }
+
+      .brand-mobile img {
+        width: 42px;
+        height: 42px
+      }
+
+      .brand-mobile h1 {
+        font-size: 17px
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="auth-shell">
+
+    <!-- ============================ FORM (sinistra) ============================ -->
+    <main class="form-panel">
+      <div class="form-wrap">
+
+        <div class="brand-mobile">
+          <img src="img/hemmy.png" onerror="this.style.display='none'" />
+          <h1>Hemmy</h1>
+          <p>You Think. It Builds.</p>
+        </div>
+
+        <div class="brand">
+          <img src="img/hemmy.png" onerror="this.style.display='none'" />
+          <h1>Hemmy</h1>
+          <p>You Think. It Builds.</p>
+        </div>
+
+        <div class="tabs">
+          <button id="tabLogin" class="active" type="button">Accedi</button>
+          <button id="tabRegister" type="button">Registrati</button>
+        </div>
+
+        <form id="form" autocomplete="on" novalidate>
+          <!-- Campi solo registrazione -->
+          <div id="registerFields" class="hidden">
+            <label for="u">Username <span class="req">*</span></label>
+            <input id="u" name="username" autocomplete="username" minlength="3" maxlength="32" placeholder="mario.rossi"
+              spellcheck="false" autocapitalize="none" />
+
+            <div class="name-row">
+              <div>
+                <label for="n">Nome <span class="req">*</span></label>
+                <input id="n" name="given-name" autocomplete="given-name" maxlength="64" placeholder="Mario"
+                  spellcheck="false" />
+              </div>
+              <div>
+                <label for="c">Cognome <span class="req">*</span></label>
+                <input id="c" name="family-name" autocomplete="family-name" maxlength="64" placeholder="Rossi"
+                  spellcheck="false" />
+              </div>
+            </div>
+            <div class="form-hint">
+              Nome e Cognome verranno usati per il tuo profilo.
+            </div>
+          </div>
+
+          <label for="e">Email <span class="req">*</span></label>
+          <input id="e" name="email" type="email" autocomplete="email" required placeholder="nome@azienda.it"
+            spellcheck="false" autocapitalize="none" />
+
+          <label for="p">Password <span class="req">*</span></label>
+          <input id="p" name="password" type="password" autocomplete="current-password" required minlength="8"
+            placeholder="••••••••" />
+
+          <button class="submit" id="submitBtn" type="submit">Accedi</button>
+          <div class="msg" id="msg"></div>
+        </form>
+
+        <div class="form-foot">
+          <a href="https://hemmy.it" target="_blank" rel="noopener">← Torna al sito</a>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- ============================ VETRINA (destra) ============================ -->
+    <aside class="showcase" aria-hidden="true">
+      <div class="showcase-inner">
+
+        <div>
+          <h2>You Think.<br><span class="grad">It Builds.</span></h2>
+          <p class="lead" style="margin-top:18px">
+            L'AI agent che trasforma l'intento umano in infrastruttura funzionante.
+            Legge lo stato reale, ragiona e costruisce — sempre sotto il tuo controllo.
+          </p>
+        </div>
+
+        <div class="props">
+          <div class="prop">
+            <svg viewBox="0 0 24 24">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+            <span><strong>200+ tool nativi</strong>, estendibili quando serve</span>
+          </div>
+          <div class="prop">
+            <svg viewBox="0 0 24 24">
+              <path d="M9 12l2 2 4-4" />
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <span><strong>Approvazione umana</strong> su ogni modifica</span>
+          </div>
+          <div class="prop">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M21 2l-2 2m-7.6 7.6a5 5 0 1 1-7.1 7.1 5 5 0 0 1 7.1-7.1zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+            </svg>
+            <span><strong>BYOK</strong> · DeepSeek, Claude, GPT, Gemini, Llama, self-hosted</span>
+          </div>
+          <div class="prop">
+            <svg viewBox="0 0 24 24">
+              <path d="M18 10h-1.3A7 7 0 1 0 5 15.7" />
+              <path d="M13 22H7a4 4 0 0 1 0-8h1" />
+            </svg>
+            <span><strong>Multi-cloud</strong>: Azure · AWS · GCP</span>
+          </div>
+        </div>
+
+        <div class="term">
+          <div class="term-head">
+            <span class="dot r"></span>
+            <span class="dot y"></span>
+            <span class="dot g"></span>
+            <span class="term-title">hemmy — agent</span>
+          </div>
+          <div class="term-body">
+            <div class="term-line">
+              <span class="prompt">›</span>
+              <span class="cmd">crea un data factory in dev</span>
+            </div>
+            <div class="term-line"><span class="ok">✓</span><span>scaffold modulo <span class="c">adf</span></span>
+            </div>
+            <div class="term-line"><span class="ok">✓</span><span>terraform plan · <span class="num">+12</span> <span
+                  class="dim">~0</span> <span class="err">-0</span></span></div>
+            <div class="term-line"><span class="ok">✓</span><span>lint superato · commit <span
+                  class="c">a3f9</span></span></div>
+            <div class="term-line ask">
+              <span class="warn">?</span>
+              <span>applicare su <span class="c">dev</span>? <span class="dim">[approva]</span><span
+                  class="term-cursor"></span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="showcase-foot">
+          <span>© 2025 Hemmy</span>
+          <a href="mailto:info@hemmy.it">info@hemmy.it</a>
+        </div>
+
+      </div>
+    </aside>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    /* ============================================================
+       Rifiniture client-side (IGIENE, non sicurezza)
+       ============================================================
+       Queste funzioni servono a:
+         - evitare che caratteri di controllo o tag HTML finiscano nel
+           metadata utente (anti stored-XSS "a monte");
+         - normalizzare l'Unicode per coerenza (NFC: "é" == "é");
+         - limitare la lunghezza per non gonfiare il JSONB di Supabase;
+         - rendere l'esperienza prevedibile (whitespace collassato).
+
+       NON sostituiscono la validazione server-side. La sicurezza vera
+       sta nelle RLS policy e in un trigger SQL parametrizzato (vedi
+       SQL sotto il file). Il client è sempre aggirabile: chi vuole
+       può inviare a Supabase un signUp() con metadata arbitrari,
+       bypassando questo form. Per questo la difesa deve essere
+       server-side.
+       ============================================================ */
+
+    // Strip control char, tag HTML, collassa spazi, cap di lunghezza.
+    // Preserva Unicode (accenti, ideogrammi, ecc.).
+    function sanitizeName(s) {
+      if (s == null) return "";
+      let t = String(s).normalize("NFC");
+      // rimuove C0/C1 control characters (newline, tab, NUL, ecc.)
+      t = t.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+      // rimuove i caratteri usati per aprire/chiudere tag HTML
+      t = t.replace(/[<>]/g, "");
+      // collassa whitespace multipli in uno solo
+      t = t.replace(/\s+/g, " ");
+      // trim + cap a 64 char (coerente con maxlength dell'input)
+      return t.trim().slice(0, 64);
+    }
+
+    // Un nome valido ha almeno una lettera Unicode (copre "José", "李明",
+    // "Müller", "O'Brien", "Anne-Marie" ecc.).
+    function isValidName(s) {
+      if (!s) return false;
+      const t = s.trim();
+      if (t.length < 1 || t.length > 64) return false;
+      if (!/\p{L}/u.test(t)) return false;
+      return true;
+    }
+
+    // Username: solo caratteri sicuri, lowercase.
+    function sanitizeUsername(s) {
+      if (s == null) return "";
+      return String(s)
+        .normalize("NFC")
+        .toLowerCase()
+        .replace(/[^a-z0-9._-]/g, "")
+        .slice(0, 32);
+    }
+
+    function isValidUsername(s) {
+      if (!s) return false;
+      if (s.length < 3 || s.length > 32) return false;
+      // deve iniziare e finire con lettera o numero
+      if (!/^[a-z0-9]/.test(s) || !/[a-z0-9]$/.test(s)) return false;
+      return true;
+    }
+
+    function isValidEmail(s) {
+      if (!s) return false;
+      // validazione volutamente permissiva: il vero controllo lo fa Supabase.
+      // Serve solo a intercettare typo evidenti prima della chiamata di rete.
+      return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s);
+    }
+
+    function isValidPassword(s) {
+      // Minimo 8, con almeno una lettera e un numero. Supabase enforce un
+      // minimo (configurabile) lato server; questo è un pre-check UX.
+      if (!s || s.length < 8) return false;
+      if (!/[A-Za-z]/.test(s)) return false;
+      if (!/[0-9]/.test(s)) return false;
+      return true;
+    }
+
+    /* ============================================================
+       Logica form
+       ============================================================ */
+
+    let mode = "login"; // "login" | "register"
+
+    const tabLogin = document.getElementById("tabLogin");
+    const tabRegister = document.getElementById("tabRegister");
+    const submitBtn = document.getElementById("submitBtn");
+    const registerFields = document.getElementById("registerFields");
+    const usernameInput = document.getElementById("u");
+    const nomeInput = document.getElementById("n");
+    const cognomeInput = document.getElementById("c");
+    const emailInput = document.getElementById("e");
+    const pwd = document.getElementById("p");
+    const msgBox = document.getElementById("msg");
+
+    function showMsg(text, kind) {
+      msgBox.className = "msg " + (kind || "");
+      msgBox.textContent = text || "";
+    }
+    function clearMsg() { showMsg(""); }
+
+    function setMode(m) {
+      mode = m;
+      tabLogin.classList.toggle("active", m === "login");
+      tabRegister.classList.toggle("active", m === "register");
+      submitBtn.textContent = m === "login" ? "Accedi" : "Crea account";
+      pwd.autocomplete = m === "login" ? "current-password" : "new-password";
+      registerFields.classList.toggle("hidden", m !== "register");
+      usernameInput.required = m === "register";
+      nomeInput.required = m === "register";
+      cognomeInput.required = m === "register";
+      clearMsg();
+    }
+    tabLogin.onclick = () => setMode("login");
+    tabRegister.onclick = () => setMode("register");
+
+    // --- Se già loggato, vai diretto all'app ---
+    (async () => {
+      try {
+        const { data } = await window.HEMMY_SUPABASE.auth.getSession();
+        if (data && data.session) {
+          location.href = "index.html";
+        }
+      } catch (e) { /* ignora */ }
+    })();
+
+    // --- Submit ---
+    document.getElementById("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearMsg();
+
+      const email = emailInput.value.trim();
+      const password = pwd.value;
+
+      // ======================= VALIDAZIONE =======================
+      if (!isValidEmail(email)) {
+        showMsg("Inserisci un indirizzo email valido.", "err");
+        emailInput.focus();
+        return;
+      }
+
+      if (mode === "login") {
+        if (!password) {
+          showMsg("Inserisci la password.", "err");
+          pwd.focus();
+          return;
+        }
+      }
+
+      let username = "";
+      let nome = "";
+      let cognome = "";
+      let displayName = "";
+
+      if (mode === "register") {
+        // Sanitizza PRIMA di validare, così l'utente vede l'effetto
+        // dei caratteri rimossi (es. non può registrarsi con "<script>")
+        username = sanitizeUsername(usernameInput.value);
+        nome = sanitizeName(nomeInput.value);
+        cognome = sanitizeName(cognomeInput.value);
+
+        if (!isValidUsername(username)) {
+          showMsg("Username non valido: 3-32 caratteri, solo lettere, numeri, punto, underscore o trattino.", "err");
+          usernameInput.focus();
+          return;
+        }
+        if (!isValidName(nome)) {
+          showMsg("Inserisci un nome valido (almeno una lettera).", "err");
+          nomeInput.focus();
+          return;
+        }
+        if (!isValidName(cognome)) {
+          showMsg("Inserisci un cognome valido (almeno una lettera).", "err");
+          cognomeInput.focus();
+          return;
+        }
+        if (!isValidPassword(password)) {
+          showMsg("La password deve avere almeno 8 caratteri, con almeno una lettera e un numero.", "err");
+          pwd.focus();
+          return;
+        }
+
+        // Ricompone i campi sanitizzati negli input (feedback visivo)
+        usernameInput.value = username;
+        nomeInput.value = nome;
+        cognomeInput.value = cognome;
+
+        // Costruisce display_name come "Nome Cognome" (trim per sicurezza)
+        displayName = `${nome} ${cognome}`.trim().slice(0, 128);
+      }
+
+      submitBtn.disabled = true;
+
+      try {
+        if (mode === "login") {
+          const { data, error } = await window.HEMMY_SUPABASE.auth.signInWithPassword({
+            email, password
+          });
+          if (error) {
+            showMsg(traduciErrore(error.message), "err");
+            submitBtn.disabled = false;
+            return;
+          }
+          if (!data.session) {
+            showMsg("Accesso riuscito ma nessuna sessione attiva. Riprova.", "err");
+            submitBtn.disabled = false;
+            return;
+          }
+          location.href = "index.html";
+
+        } else {
+          // ======================= REGISTRAZIONE =======================
+          // I metadati vengono letti dal trigger handle_new_user() su
+          // Supabase, che li copia in public.profiles. Il trigger deve
+          // essere parametrizzato (vedi SQL sotto il file).
+          //
+          // Nota: `options.data` finisce in auth.users.raw_user_meta_data
+          // (JSONB). Nessuna SQL è costruita da questi valori: il client
+          // manda JSON, PostgREST lo inserisce parametrizzato.
+          const { data, error } = await window.HEMMY_SUPABASE.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                username: username,
+                display_name: displayName,
+                given_name: nome,
+                family_name: cognome,
+              }
+            }
+          });
+
+          if (error) {
+            showMsg(traduciErrore(error.message), "err");
+            submitBtn.disabled = false;
+            return;
+          }
+
+          // Caso A: email confirmation disabilitata → Supabase restituisce subito la session
+          if (data && data.session) {
+            showMsg("Account creato, accesso in corso…", "ok");
+            location.href = "index.html";
+            return;
+          }
+
+          // Caso B: email confirmation abilitata → utente deve confermare via email
+          if (data && data.user) {
+            showMsg("Account creato. Controlla la tua email e conferma l'indirizzo prima di accedere.", "ok");
+            setMode("login");
+            submitBtn.disabled = false;
+            return;
+          }
+
+          showMsg("Registrazione non riuscita. Riprova.", "err");
+          submitBtn.disabled = false;
+        }
+      } catch (err) {
+        showMsg("Errore di rete: " + (err.message || err), "err");
+        submitBtn.disabled = false;
+      }
+    });
+
+    // --- Messaggi di errore Supabase → italiano ---
+    function traduciErrore(msg) {
+      const m = (msg || "").toLowerCase();
+      if (m.includes("invalid login credentials")) return "Email o password non corretti.";
+      if (m.includes("email not confirmed")) return "Devi prima confermare la tua email (controlla la casella).";
+      if (m.includes("user already registered")) return "Questa email è già registrata. Prova ad accedere.";
+      if (m.includes("password should be at least")) return "La password è troppo corta.";
+      if (m.includes("unable to validate email")) return "Email non valida.";
+      if (m.includes("email rate limit exceeded")) return "Troppi tentativi. Riprova tra qualche minuto.";
+      if (m.includes("duplicate key") && m.includes("username"))
+        return "Questo username è già in uso. Scegline un altro.";
+      if (m.includes("database error saving new user"))
+        return "Registrazione rifiutata (probabile username duplicato). Riprova con un altro username.";
+      return msg || "Operazione non riuscita.";
+    }
+  </script>
+</body>
+
+</html>

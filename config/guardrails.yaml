@@ -1,0 +1,310 @@
+# Policy di sicurezza dell'agente ADF
+# L'agente può eseguire azioni di SCRITTURA, ma SEMPRE con approvazione umana
+# esplicita (human-in-the-loop / "man in the middle"). Le letture sono libere.
+
+mode: supervised # read_only | supervised | autonomous
+
+# Azioni consentite senza approvazione (read-only)
+allowed_actions:
+- adf.list_pipelines
+- adf.get_pipeline
+- adf.get_pipeline_runs
+- adf.get_activity_runs
+- adf.get_triggers
+- adf.get_factory_identity
+- adf.list_managed_private_endpoints
+- rbac.list_role_assignments
+- network.list_vnets
+- network.list_subnets
+- network.list_private_endpoints
+- network.list_nsgs
+- adf.list_linked_services
+- adf.get_linked_service
+- adf.list_datasets
+- adf.get_dataset
+- blob.list_storage_accounts
+- blob.list_containers
+- blob.list_containers_for_account
+- blob.list_blobs_for_account
+- blob.get_blob_schema_for_account
+- blob.list_blobs
+- blob.get_blob_schema
+- sql.list_tables
+- sql.get_table_schema
+- sql.get_row_count
+- sql.list_tables_for_connection
+- sql.get_table_schema_for_connection
+- sql.get_row_count_for_connection
+- table.list_tables
+- queue.list_queues
+- fileshare.list_shares
+- fileshare.list_directories_and_files
+- resource.list_resource_groups
+- sql.list_sql_servers
+- sql.list_sql_databases
+- docs.sync
+- docs.add_note
+- docs.remove_note
+- iac.init
+- iac.validate
+- iac.plan
+- iac.show
+- iac.state_list
+- iac.output
+- iac.write_file
+- iac.lint_files
+- iac.generate_moved
+- iac.scaffold
+- iac.scaffold_module
+- iac.scaffold_environment
+- cicd.generate_pipeline
+- cicd.get_status
+- cicd.wait_for_run
+- cicd.get_run_jobs
+- cicd.get_run_logs
+- cicd.render_pipeline
+- cicd.render_pipelines
+- cicd.generate_oidc_federation
+- naming.build
+- feasibility.check
+- remediation.classify
+- github.get_default_branch
+- github.get_file
+- github.get_files
+- github.list_directory
+- github.read_folder
+- github.get_tree
+- github.search_code
+- github.get_latest_run
+- github.get_commit
+- github.get_diff
+- github.get_workflow
+- github.list_branches
+- github.list_pull_requests
+- github.get_pull_request
+- keyvault.list_vaults
+- keyvault.list_secrets
+- resource.list_resources
+- lock.list_locks
+- meta.list_capabilities
+- meta.analyze_request
+- meta.propose_tool
+- meta.list_plugins
+- files.list_uploads
+- files.read_upload_text
+
+# Azioni di scrittura: consentite SOLO previa approvazione umana esplicita
+write_actions:
+require_human_approval: true
+actions:
+- adf.create_linked_service
+- adf.create_dataset
+- adf.create_pipeline
+- adf.create_copy_pipeline
+- adf.trigger_pipeline_run
+- adf.run_and_wait
+- adf.delete_linked_service
+- adf.delete_dataset
+- adf.delete_pipeline
+- iac.apply
+- iac.destroy
+- iac.import
+- resource.move_resources
+- lock.create_lock
+- lock.delete_lock
+- cicd.trigger_pipeline
+- iac.configure_remote_backend
+- github.commit_files
+- github.create_branch
+- github.delete_branch
+- github.create_pull_request
+- github.merge_pull_request
+- github.set_secret
+- keyvault.set_secret
+- keyvault.delete_secret
+- adf.create_keyvault_linked_service
+- adf.create_linked_service_kv
+- rbac.assign_role
+- rbac.remove_role_assignment
+- adf.create_managed_vnet
+- adf.create_managed_private_endpoint
+- sql.execute_write
+- sql.execute_write_for_connection
+- blob.upload
+- blob.create_container
+- blob.delete_container
+- table.create_table
+- table.delete_table
+- queue.create_queue
+- queue.delete_queue
+- fileshare.create_share
+- fileshare.create_directory
+- fileshare.delete_share
+- resource.create_resource_group
+- blob.create_storage_account
+- sql.create_sql_server
+- sql.create_sql_database
+- meta.install_tool
+- meta.remove_plugin
+
+# Validazione
+validation:
+# Keyword vietate in modo ASSOLUTO su sql.execute_write, anche se approvate.
+# Lista vuota = qualsiasi comando SQL (incl. DROP/TRUNCATE) è consentito, ma SEMPRE
+# previa approvazione umana (human-in-the-loop). Aggiungi keyword qui per vietarle.
+always_deny_sql: []
+# Blocca keyword pericolose passate ai tool di LETTURA (anti SQL-injection).
+block_destructive_sql: true
+max_rows_returned: 1000 # limite righe per query di lettura
+redact_secrets_in_logs: true # oscura credenziali/connection string nei log
+
+# Approvazione umana
+approval:
+prompt_before_write: true
+timeout_seconds: 120
+
+# ===========================================================================
+# POLITICA SUI DOMINI E SUL CODICE SORGENTE
+# ===========================================================================
+#
+# Principio: gli utenti sono liberi di operare su TUTTI i domini funzionali
+# (adf, sql, blob, github, iac, cicd, ecc.) — leggere, scrivere, eseguire.
+# NON possono toccare il codice sorgente dell'agente, la sua configurazione
+# o il filesystem del server. Questi ultimi sono riservati all'amministratore
+# della piattaforma e non devono essere raggiungibili da alcun tool.
+
+# Domini riservati: vietati in modo assoluto, per qualunque ruolo,
+# in qualunque modalità. Il guardrails engine deve filtrare il catalogo
+# dei tool escludendo questi domini PRIMA di passarli all'agente, e
+# meta.install_tool deve rifiutare plugin che usano questi domini.
+reserved_domains:
+- filesystem # accesso al filesystem del server
+- shell # esecuzione di comandi shell
+- subprocess # spawn di processi
+- process # gestione processi
+- system # operazioni di sistema
+- exec # esecuzione codice
+- eval # valutazione codice
+- import # import dinamico
+- os # modulo os
+- sys # modulo sys
+- socket # rete raw
+- ssh # accesso remoto
+- docker # container
+- kubernetes # orchestrazione
+- admin # operazioni amministrative
+- internal # namespace interno
+- config # file di configurazione dell'agente
+- secrets # secret store di piattaforma
+- database # DB interno dell'agente
+
+# ===========================================================================
+# POLITICA SUI TOOL NATIVI E SUI PLUGIN UTENTE
+# ===========================================================================
+#
+# I tool nativi (definiti nel codice dell'agente, es. adf.*, github.*, sql.*)
+# possono essere USATI e LETTI da chiunque, ma NON modificati, sostituiti,
+# cancellati o shadowati. Sono parte del prodotto, non dell'utente.
+#
+# I plugin creati dall'utente (via meta.propose_tool / meta.install_tool)
+# sono invece di proprietà dell'utente: può crearli, leggerli, modificarli,
+# rimuoverli, senza vincoli (a parte i domini riservati sopra).
+
+native_tools_policy:
+# I tool nativi non possono essere cancellati o sovrascritti da plugin.
+# Enforcement in meta.install_tool e meta.remove_plugin.
+immutable: true
+# L'utente può solo "usarli" (chiamarli) e "leggerne la descrizione"
+# (vengono elencati in meta.list_capabilities).
+allowed_operations:
+- use
+- read_description
+# Operazioni vietate sui tool nativi:
+forbidden_operations:
+- modify
+- delete
+- shadow # creare un plugin con lo stesso nome
+- override
+- replace
+- unregister
+
+user_plugins_policy:
+# I plugin dell'utente sono sotto il suo controllo, per intero.
+owned_by_user: true
+allowed_operations:
+- create
+- read
+- update
+- delete
+- list
+# Vincoli che restano anche sui plugin utente:
+forbidden_domains: [] # eredita reserved_domains sopra
+forbid_native_collision: true # un plugin non può avere il nome di un tool nativo
+max_plugins_per_user: 50 # limite anti-abuso
+max_plugin_size_bytes: 50000 # dimensione massima del codice sorgente del plugin
+
+# ===========================================================================
+# VALIDAZIONE STATICA DEL CODICE DEI PLUGIN
+# ===========================================================================
+#
+# Quando un utente propone un nuovo plugin (meta.propose_tool), il codice
+# viene ispezionato PRIMA dell'installazione. Non è una sandbox (Python
+# non è sandboxabile in-process), ma blocca i casi ovvi e alza il costo
+# di un bypass. L'installazione richiede comunque approvazione umana.
+
+plugin_code_validation:
+enabled: true
+# Import vietati: l'utente che scrive un plugin non deve poter accedere
+# a moduli che danno controllo sull'host o sul processo dell'agente.
+forbidden_imports:
+- os
+- sys
+- subprocess
+- shutil
+- pathlib
+- ctypes
+- importlib
+- pty
+- socket
+- signal
+- resource
+- glob
+- tempfile
+- pickle
+- marshal
+- multiprocessing
+- threading
+- asyncio
+# Chiamate vietate: pattern testuali che indicano accesso a risorse
+# interne o esecuzione dinamica di codice.
+forbidden_calls:
+- "__import__"
+- "eval("
+- "exec("
+- "compile("
+- "open("
+- "popen"
+- "system("
+- "os.environ"
+- "os.getenv"
+- "subprocess."
+- "shutil."
+- "pathlib."
+- "glob."
+- "tempfile."
+- "__builtins__"
+- "__globals__"
+- "__subclasses__"
+- "__class__.__bases__"
+# Pattern di nome plugin vietati (match per prefisso).
+forbidden_plugin_name_prefixes:
+- filesystem.
+- shell.
+- exec.
+- system.
+- process.
+- subprocess.
+- admin.
+- internal.
+- config.
+- secrets.

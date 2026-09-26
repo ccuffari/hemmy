@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Infra Almanac - subscription-f4a32007</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin:0; background:#f4f6f8; color:#222; }
+  header { background:#1f2937; color:#fff; padding:20px 30px; }
+  header h1 { margin:0 0 6px 0; font-size:22px; }
+  header .meta { font-size:13px; opacity:.8; }
+  .summary { display:flex; gap:16px; padding:20px 30px; }
+  .kpi { flex:1; background:#fff; border-radius:10px; padding:18px; box-shadow:0 1px 4px rgba(0,0,0,.08); text-align:center; }
+  .kpi .num { font-size:32px; font-weight:700; }
+  .kpi .lbl { font-size:13px; color:#666; text-transform:uppercase; letter-spacing:.5px; }
+  .cards { padding:0 30px 40px 30px; display:grid; gap:14px; }
+  .card { background:#fff; border-radius:10px; padding:16px 18px; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+  .card-head { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .badge { color:#fff; font-weight:700; font-size:12px; padding:4px 10px; border-radius:6px; }
+  .rname { font-weight:600; font-size:16px; }
+  .rtype { color:#888; font-size:12px; }
+  .rg { color:#2563eb; font-size:11px; background:#eff6ff; padding:2px 8px; border-radius:4px; }
+  .metrics { margin-top:10px; display:flex; flex-wrap:wrap; gap:10px; font-size:13px; color:#444; }
+  .metric { background:#f1f5f9; padding:4px 10px; border-radius:6px; }
+  .issues { margin:10px 0 0 0; padding-left:20px; color:#b91c1c; font-size:13px; }
+  .section { padding:0 30px 40px 30px; }
+  .section h2 { font-size:18px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Infra Almanac &mdash; subscription-f4a32007</h1>
+  <div class="meta">Generato: 2026-09-23 14:10 UTC &middot; Risorse: 13</div>
+</header>
+<div class="summary">
+  <div class="kpi"><div class="num" style="color:#28a745">9</div><div class="lbl">Healthy</div></div>
+  <div class="kpi"><div class="num" style="color:#ffc107">4</div><div class="lbl">Warning</div></div>
+  <div class="kpi"><div class="num" style="color:#dc3545">0</div><div class="lbl">Error</div></div>
+  <div class="kpi"><div class="num" style="color:#6c757d">0</div><div class="lbl">Unknown</div></div>
+</div>
+<div class="cards">
+  <div class="card" style="border-left:6px solid #ffc107;">
+    <div class="card-head">
+      <span class="badge" style="background:#ffc107;">WARN</span>
+      <span class="rname">sttfstatedevwe01</span>
+      <span class="rtype">Microsoft.Storage/storageAccounts</span>
+      <span class="rg">rgtfstatedevwe01</span>
+    </div>
+    <div class="metrics"><span class="metric"><b>sku</b>: Standard_RAGRS</span><span class="metric"><b>kind</b>: StorageV2</span><span class="metric"><b>provisioning</b>: Succeeded</span><span class="metric"><b>https_only</b>: True</span><span class="metric"><b>min_tls</b>: TLS1_2</span><span class="metric"><b>network_default</b>: Allow</span><span class="metric"><b>public_access</b>: Enabled</span><span class="metric"><b>lifecycle_rules</b>: 0</span></div>
+    <ul class="issues"><li>Network default action = Allow (accesso pubblico aperto)</li><li>Nessuna lifecycle policy</li></ul>
+  </div>
+  <div class="card" style="border-left:6px solid #28a745;">
+    <div class="card-head">
+      <span class="badge" style="background:#28a745;">OK</span>
+      <span class="rname">sql-ai-dev-we-01</span>
+      <span class="rtype">Microsoft.Sql/servers</span>
+      <span class="rg">rg-ai-dev-we-01</span>
+    </div>
+    <div class="metrics"><span class="metric"><b>state</b>: Ready</span><span class="metric"><b>fqdn</b>: sql-ai-dev-we-01.database.windows.net</span><span class="metric"><b>public_access</b>: Enabled</span><span class="metric"><b>firewall_ip_rules</b>: 1</span><span class="metric"><b>allow_azure_services</b>: True</span><span class="metric"><b>firewall_vnet_rules</b>: 1</span></div>
+    
+  </div>
+  <div class="card" style="border-left:6px solid #28a745;">
+    <div class="card-head">
+      <span class="badge" style="background:#28a745;">OK</span>
+      <span class="rname">adf-ai-dev-we-01</span>
+      <span class="rtype">Microsoft.DataFactory/factories</span>
+      <span class="rg">rg-ai-dev-we-01</span>
+    </div>
+    <div class="metrics"><span class="metric"><b>provisioning</b>: Succeeded</span><span class="metric"><b>public_access</b>: Enabled</span><span class="metric"><b>pipeline_runs_7d</b>: 0</span><span class="metric"><b>pipeline_failed_7d</b>: 0</span></div>
+    
+  </div>
+  <div class="card" style="border-left:6px solid #28a745;">
+    <div class="card-head">
+      <span class="badge" style="background:#28a745;">OK</span>
+      <span class="rname">log-ai-dev-we-01</span>
+      <span class="rtype">Microsoft.OperationalInsights/workspaces</span>
+      <span class="rg">rg-ai-dev-we-01</span>
+    </div>
+    <div class="metrics"><span class="metric"><b>sku</b>: PerGB2018</span><span class="metric"><b>retention_days</b>: 30</span><span class="metric"><b>provisioning</b>: Succeeded</span></div>
+    
+  </div>
+  <div class="card" style="border-left:6px solid #28a745;">
+    <div class="card-head">
+      <span class="badge" style="background:#28a745;">OK</span>
+      <span class="rname">vnet-ai-dev-we-01</span>
+      <span class="rtype">Microsoft.Network/virtualNetworks</span>
+      <span class="rg">rg-ai-dev-we-01</span>
+    </div>
+    <div class="metrics"><span class="metric"><b>address_space</b>: 10.0.0.0/16</span><span class="metric"><b>subnets</b>: 1</span><span class="metric"><b>provisioning</b>: Succeeded</span><span class="metric"><b>peerings</b>: 0</span></div>
+    
+  </div>
+  <div class="card" style="border-left:6px solid #ffc107;">
+    <div class="card-head">
+      <span class="badge" style="background:#ffc107;">WARN</span>
+      <span class="rname">saaidevwe01</span>
+      <span class="rtype">Microsoft.Storage/storageAccounts</span>
+      <span class="rg">rg-ai-dev-we-01</span>
+    </div>
+    <div class="metrics"><span class="metric"><b>sku</b>: Standard_LRS</span><span class="metric"><b>kind</b>: StorageV2</span><span class="metric"><b>provisioning</b>: Succeeded</span><span class="metric"><b>https_only</b>: True</span><span class="metric"><b>min_tls</b>: TLS1_2</span><span class="metric"><b>network_default</b>: Deny</span><span class="metric"><b>public_access</b>: Enabled</span><span class="metric"><b>lifecycle_rules</b>: 0</span></div>
+    <ul class="issues"><li>Nessuna lifecycle policy</li></ul>
+  </div>
+  <div class="card" style="border-left:6px solid #28a745;">
+    <div class="card-head">
+      <span class="badge" style="background:#28a745;">OK</span>
+      <span class="rname">sql-ai-dev-we-01/master</span>
+      <span class="rtype">Microsoft.Sql/servers/databases</span>
+      <span class="rg">rg-ai-dev-we-01</span>
+    </div>
+    <div class="metrics"><span class="metric"><b>status</b>: Online</span><span class="metric"><b>sku</b>: GP_SYSTEM</span><span class="metric"><b>cpu_percent_max</b>: 0</span></div>
+    
+  </div>
+  <div class="card" style="border-left:6px solid #28a745;">
+    <div class="card-head">
+      <span class="badge" style="background:#28a745;">OK</span>
+      <span class="rname">sql-ai-dev-we-01/sql-db-ai-dev-we-01</span>
+      <span class="rtype">Microsoft.Sql/servers/databases</span>
+      <span class="rg">rg-ai-dev-we-01</span>
+    </div>
+    <div class="metrics"><span class="metric"><b>status</b>: Online</span><span class="metric"><b>sku</b>: Standard</span><span class="metric"><b>dtu_consumption_percent_max</b>: 0</span><span class="metric"><b>cpu_percent_max</b>: 0</span></div>
+    
+  </div>
+  <div class="card" style="border-left:6px solid #ffc107;">
+    <div class="card-head">
+      <span class="badge" style="background:#ffc107;">WARN</span>
+      <span class="rname">saaidevwe02</span>
+      <span class="rtype">Microsoft.Storage/storageAccounts</span>
+      <span class="rg">rg-ai-dev-we-01</span>
+    </div>
+    <div class="metrics"><span class="metric"><b>sku</b>: Standard_LRS</span><span class="metric"><b>kind</b>: StorageV2</span><span class="metric"><b>provisioning</b>: Succeeded</span><span class="metric"><b>https_only</b>: True</span><span class="metric"><b>min_tls</b>: TLS1_2</span><span class="metric"><b>network_default</b>: Deny</span><span class="metric"><b>public_access</b>: Enabled</span><span class="metric"><b>lifecycle_rules</b>: 0</span></div>
+    <ul class="issues"><li>Nessuna lifecycle policy</li></ul>
+  </div>
+  <div class="card" style="border-left:6px solid #28a745;">
+    <div class="card-head">
+      <span class="badge" style="background:#28a745;">OK</span>
+      <span class="rname">dbw-ai-dev-we-01</span>
+      <span class="rtype">Microsoft.Databricks/workspaces</span>
+      <span class="rg">rg-ai-dev-we-01</span>
+    </div>
+    <div class="metrics"><span class="metric"><b>provisioning</b>: Succeeded</span><span class="metric"><b>sku</b>: premium</span><span class="metric"><b>workspace_url</b>: adb-7405606862282956.16.azuredatabricks.net</span><span class="metric"><b>managed_rg</b>: databricks-rg-rg-ai-dev-we-01</span></div>
+    
+  </div>
+  <div class="card" style="border-left:6px solid #28a745;">
+    <div class="card-head">
+      <span class="badge" style="background:#28a745;">OK</span>
+      <span class="rname">workers-sg</span>
+      <span class="rtype">Microsoft.Network/networkSecurityGroups</span>
+      <span class="rg">databricks-rg-rg-ai-dev-we-01</span>
+    </div>
+    <div class="metrics"><span class="metric"><b>custom_rules</b>: 1</span><span class="metric"><b>provisioning</b>: Succeeded</span></div>
+    
+  </div>
+  <div class="card" style="border-left:6px solid #ffc107;">
+    <div class="card-head">
+      <span class="badge" style="background:#ffc107;">WARN</span>
+      <span class="rname">dbstoragervlvnsvgedpqa</span>
+      <span class="rtype">Microsoft.Storage/storageAccounts</span>
+      <span class="rg">databricks-rg-rg-ai-dev-we-01</span>
+    </div>
+    <div class="metrics"><span class="metric"><b>sku</b>: Standard_ZRS</span><span class="metric"><b>kind</b>: StorageV2</span><span class="metric"><b>provisioning</b>: Succeeded</span><span class="metric"><b>https_only</b>: True</span><span class="metric"><b>min_tls</b>: TLS1_2</span><span class="metric"><b>network_default</b>: Allow</span><span class="metric"><b>lifecycle_rules</b>: 2</span></div>
+    <ul class="issues"><li>Network default action = Allow (accesso pubblico aperto)</li></ul>
+  </div>
+  <div class="card" style="border-left:6px solid #28a745;">
+    <div class="card-head">
+      <span class="badge" style="background:#28a745;">OK</span>
+      <span class="rname">workers-vnet</span>
+      <span class="rtype">Microsoft.Network/virtualNetworks</span>
+      <span class="rg">databricks-rg-rg-ai-dev-we-01</span>
+    </div>
+    <div class="metrics"><span class="metric"><b>address_space</b>: 10.139.0.0/16</span><span class="metric"><b>subnets</b>: 2</span><span class="metric"><b>provisioning</b>: Succeeded</span><span class="metric"><b>peerings</b>: 0</span></div>
+    
+  </div></div>
+
+</body>
+</html>

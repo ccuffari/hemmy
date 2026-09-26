@@ -1,0 +1,53 @@
+# Build context del Dockerfile di root (backend Hemmy). Tutto ciò che NON serve
+# a runtime nel container: segreti locali, stato effimero, tooling di sviluppo.
+
+.git/
+.github/
+.gitignore
+
+# Segreti/credenziali locali — MAI nell'immagine
+.env
+.env.*
+config/backend.yaml
+config/.master.key
+.anonymizer.json
+.session.json
+
+# Stato runtime locale (SQLite, plugin utente, master key): su Cloud Run vive
+# su Supabase, non nel filesystem del container
+data/
+
+# Log locali
+logs/
+*.log
+
+# Frontend: servizio Cloud Run separato (vedi frontend/Dockerfile), non serve
+# nell'immagine backend
+frontend/
+
+# Terraform del prodotto (IaC dei clienti, non l'infra di Hemmy stesso)
+infra/
+
+# Progetto Supabase locale (migrazioni/schema, non runtime)
+supabase/
+
+# Documentazione, test, tooling dev. NOTA: README.md NON è escluso — pyproject.toml
+# lo referenzia come `readme`, serve nel build context per `pip install .`.
+docs/
+tests/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Editor/OS
+.vscode/
+.idea/
+.DS_Store

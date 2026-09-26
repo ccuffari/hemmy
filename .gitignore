@@ -1,0 +1,40 @@
+# Credenziali - MAI versionare
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+venv/
+
+# Testing
+.pytest_cache/
+
+# Sessione e audit (runtime)
+.session.json
+logs/
+config/backend.yaml
+.anonymizer.json
+
+# Multi-utente (runtime): DB utenti, master key di cifratura, tool generati a
+# runtime (globali + per-utente, in data/plugins/ — SEMPRE fuori dal sorgente,
+# mai sotto src/hemmy/: solo native_plugins/ lì è la baseline versionata).
+data/
+# senza slash iniziale: esclude .master.key a QUALUNQUE profondità (mai solo
+# la copia attesa in config/ — vedi secrets_crypto._default_local_path per il
+# bug che l'ha resa necessaria: un cwd diverso può farla nascere altrove).
+.master.key
+
+# Terraform (stato/piani/provider scaricati)
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/*.tfstate
+infra/*.tfstate.*
+infra/tfplan
+
+# Build/packaging
+*.egg-info/
+build/
+dist/

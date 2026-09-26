@@ -1,0 +1,98 @@
+{
+  "resource_groups": {
+    "rgtfstatedevwe01": {
+      "location": "westeurope"
+    },
+    "NetworkWatcherRG": {
+      "location": "westeurope"
+    },
+    "rg-ai-dev-we-01": {
+      "location": "westeurope"
+    },
+    "databricks-rg-rg-ai-dev-we-01": {
+      "location": "westeurope"
+    }
+  },
+  "storage_accounts": {
+    "saaidevwe01": {
+      "resource_group": "rg-ai-dev-we-01",
+      "location": "westeurope",
+      "sku": "Standard_LRS"
+    },
+    "saaidevwe02": {
+      "resource_group": "rg-ai-dev-we-01",
+      "location": "westeurope",
+      "sku": "Standard_LRS"
+    }
+  },
+  "storage": {
+    "saaidevwe01": {
+      "containers": [],
+      "tables": [],
+      "queues": [],
+      "file_shares": []
+    },
+    "saaidevwe02": {
+      "containers": [],
+      "tables": [],
+      "queues": [],
+      "file_shares": []
+    },
+    "sttfstatedevwe01": {
+      "containers": [
+        "tfstate"
+      ],
+      "tables": [],
+      "queues": [],
+      "file_shares": []
+    }
+  },
+  "sql_servers": {
+    "sql-ai-dev-we-01": {
+      "resource_group": "rg-ai-dev-we-01",
+      "location": "westeurope",
+      "databases": [
+        "sql-db-ai-dev-we-01",
+        "master"
+      ]
+    }
+  },
+  "sql_tables": {},
+  "adf": {
+    "factory": "adf-ia-agent",
+    "linked_services": {},
+    "datasets": {},
+    "pipelines": {}
+  },
+  "networking": {
+    "vnets": {
+      "vnet-ai-dev-we-01": {
+        "address_space": [
+          "10.0.0.0/16"
+        ],
+        "subnets": [
+          "subnet-ai-dev-we-01"
+        ]
+      },
+      "vnet-test-agent": {
+        "address_space": [
+          "10.99.0.0/16"
+        ],
+        "subnets": [
+          "snet-test-agent"
+        ]
+      }
+    },
+    "private_endpoints": [],
+    "nsgs": [
+      {
+        "name": "nsg-test-agent",
+        "location": "westeurope"
+      }
+    ]
+  },
+  "notes": {
+    "Blocco CI Terraform: anonimizzazione in scrittura dei file": "## Sintomo\nTutte le run della pipeline Terraform (dev) falliscono allo step **Init** con:\n```\nError: Unreadable module directory\nUnable to evaluate directory symlink: lstat ../../modules/storage: no such file or directory\nThe directory could not be read for module \"storage\" at main.tf:10.\n```\nRun coinvolte: `35217078546`, `35217153137`, `35217255659`, `35217759128`.\n\n## Causa radice\nIl contenuto testuale passato a `github.commit_files` / `iac.write_file` viene **anonimizzato in scrittura**: i nomi reali delle risorse diventano alias `<resNN>` prima di essere scritti sul repo. La de-anonimizzazione avviene solo sugli argomenti semantici dei tool, **non sul testo libero** dei file.\n\nProva: e' stato committato un `main.tf` a 3 moduli con nomi reali (`resource_group`, `storage_account`, `key_vault`), ma la run successiva mostra ancora i vecchi moduli `resource_group/storage/keyvault/datafactory` e `main.tf:10/:20/:30`. Quindi sul repo i file contengono placeholder, non i nomi reali.\n\n## Impatto\nTerraform cerca directory letteralmente chiamate `storage` ecc. -> Init fallisce sempre. Nessun `plan`/`apply` puo' andare a buon fine finche' il layer non e' corretto.\n\n## Fix necessario (una-tantum, lato piattaforma)\n1. Applicare la de-anonimizzazione anche al **contenuto** dei file scritti da `github.commit_files` e `iac.write_file`, **oppure**\n2. Escludere questi due tool dalla pipeline di anonimizzazione del testo.\n\n## Cosa e' pronto e verra' applicato dopo lo sblocco\n- Moduli: `modules/resource_group`, `modules/storage_account`, `modules/key_vault` (senza ADF).\n- `environments/dev/main.tf`: 3 moduli con nomi reali e `source` fissi.\n- `environments/dev/terraform.tfvars`: `location = \"westeurope\"`.\n- Risorse target: RG `rg-ia-dev-we-01`, Storage `saiadevwe01`, Key Vault `kviadevwe01`.\n- Passi successivi: `plan` -> import del RG esistente `rg-ia-dev-we-01` (`iac.import`) -> `apply`.\n\n## Alternativa se il layer non e' modificabile\nPassare i nomi reali come **variabili CI** (GitHub Actions vars/secrets) e referenziarli nel codice via `var.*`, cosi' il codice committato non contiene mai i nomi. Richiede comunque configurazione lato piattaforma/CI.",
+    "Architettura multi-ambiente (dev/uat/prod)": "## Ambienti\n\nLa piattaforma è deployata su **tre ambienti** via CI/CD (GitHub Actions + Terraform), ognuno con il proprio resource group:\n\n| Ambiente | Resource Group | Risorse principali |\n|---|---|---|\n| **dev** | `rg-ai-dev-we-01` | SQL Server + DB, VNet, Log Analytics, ADF, 2 storage account, Key Vault |\n| **uat** | `rg-ai-uat-we-01` | idem |\n| **prod** | `rg-ai-prod-we-01` | idem (Key Vault: `kv-ai-prod-we-02`) |\n\n## Terraform state\n\nLo state è **unificato** su un unico storage account:\n\n- Storage: `sttfstatedevwe01` (RG `rgtfstatedevwe01`)\n- Container: `tfstate`\n- Key: `dev/terraform.tfstate`, `uat/terraform.tfstate`, `prod/terraform.tfstate`\n\n> Gli storage di state dedicati per uat/prod (`sttfstateuatwe01`, `sttfstateprodwe01`) sono stati **eliminati**: non più necessari dopo l'unificazione.\n\n## Pipeline CI/CD\n\n- `terraform-dev.yml`, `terraform-uat.yml`, `terraform-prod.yml` — deploy per ambiente (workflow_dispatch: init/validate/plan/apply/destroy).\n- `terraform-bootstrap.yml` — bootstrap state (storico).\n- `az-delete-resource.yml` — **cleanup manuale** con guardrail: elimina un RG da Azure **solo se non è censito** nel codice Terraform (evita drift).\n\n## Segreti\n\n- `TF_VAR_sql_admin_login` / `TF_VAR_sql_admin_password` — a livello repo, con suffisso per ambiente (`_uat`, `_prod`).\n- `ARM_CLIENT_ID` / `ARM_CLIENT_SECRET` / `ARM_TENANT_ID` / `ARM_SUBSCRIPTION_ID` — service principal per la CI.\n\n## GitFlow\n\n`feature/*` → `dev` → `uat` → `prod`, con promozione via Pull Request gated dall'operatore."
+  }
+}

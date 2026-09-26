@@ -1,0 +1,38 @@
+# Naming convention delle risorse Azure (configurabile).
+# Pattern: <abbr>-<workload>-<env>-<region>-<instance>
+# (per gli storage account, che non ammettono trattini: <abbr><workload><env><region><instance>)
+
+pattern: "{abbr}-{workload}-{env}-{region}-{instance}"
+pattern_no_hyphen: "{abbr}{workload}{env}{region}{instance}"
+
+abbreviations:
+  resource_group: rg
+  storage_account: sa
+  key_vault: kv
+  data_factory: adf
+  sql_server: sql
+  sql_database: sqldb
+  virtual_network: vnet
+  subnet: snet
+  private_endpoint: pe
+  network_security_group: nsg
+
+regions:
+  westeurope: we
+  northeurope: ne
+  eastus: eus
+  westus: wus
+
+environments:
+  dev: dev
+  uat: uat
+  prod: prod
+
+# Tipi senza trattini (nome tutto minuscolo alfanumerico)
+no_hyphen_types:
+  - storage_account
+
+# Lunghezza massima per tipo (vincoli Azure)
+max_len:
+  storage_account: 24
+  key_vault: 24

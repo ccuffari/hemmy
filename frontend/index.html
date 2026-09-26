@@ -1,0 +1,4634 @@
+<!doctype html>
+<html lang="it">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Hemmy — You Think, It Builds.</title>
+  <link rel="icon" type="image/png" href="img/hemmy.png">
+  <link rel="apple-touch-icon" href="img/hemmy.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0b10;
+      --bg-2: #0d0f16;
+      --panel: #12141c;
+      --panel2: #181b26;
+      --panel3: #20232f;
+      --border: #232635;
+      --border-soft: #1b1e29;
+      --txt: #eef0f6;
+      --txt-dim: #c2c7d6;
+      --muted: #838b9c;
+      --accent: #6d5bf0;
+      --accent-2: #4f8cff;
+      --accent-soft: rgba(109, 91, 240, .16);
+      --ok: #22c55e;
+      --warn: #f5a524;
+      --err: #f5576c;
+      --write: #f5a524;
+      --grad: linear-gradient(135deg, var(--accent), var(--accent-2));
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, .25);
+      --shadow-md: 0 8px 24px -8px rgba(0, 0, 0, .45);
+      --radius: 14px;
+      --tok-key: #82b1ff;
+      --tok-str: #a5e075;
+      --tok-num: #f0b866;
+      --tok-bool: #c586c0;
+      --tok-kw: #9f8eff;
+      --tok-fn: #4ec9b0;
+      --tok-comment: #6a7280;
+      --tok-punct: #838b9c;
+      --code-bg: #0a0c13;
+      --code-bg-2: #0d0f17;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    ::selection {
+      background: var(--accent-soft)
+    }
+
+    html,
+    body {
+      height: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      overscroll-behavior-x: none;
+    }
+
+    body {
+      margin: 0;
+      color: var(--txt);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background:
+        radial-gradient(1100px 520px at 15% -10%, rgba(109, 91, 240, .10), transparent 60%),
+        radial-gradient(900px 480px at 100% 0%, rgba(79, 140, 255, .08), transparent 55%),
+        var(--bg);
+      font: 14px/1.55 "Inter", -apple-system, Segoe UI, Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--panel3);
+      border-radius: 20px;
+      border: 2px solid transparent;
+      background-clip: padding-box
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #2b3040;
+      background-clip: padding-box
+    }
+
+    main,
+    #chatView,
+    #panelView,
+    #log,
+    #side,
+    #inputbar,
+    #attachments {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 11px 18px;
+      background: rgba(18, 20, 28, .78);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-soft);
+      position: relative;
+      z-index: 30;
+      min-width: 0;
+    }
+
+    header .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0
+    }
+
+    header .brand img.logo {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      border-radius: 9px;
+      display: block;
+      flex: 0 0 auto;
+      background: var(--panel2);
+      box-shadow: 0 0 0 1px var(--border);
+    }
+
+    header .brand .brandtxt {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+      min-width: 0
+    }
+
+    header .brand h1 {
+      font-size: 15px;
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: .1px
+    }
+
+    header .brand .slogan {
+      font-size: 10.5px;
+      color: var(--muted);
+      letter-spacing: .2px;
+      white-space: nowrap
+    }
+
+    header .grow {
+      flex: 1
+    }
+
+    header .view-title {
+      font-size: 12.5px;
+      color: var(--muted);
+      font-weight: 500;
+      padding: 4px 12px;
+      border-left: 1px solid var(--border);
+    }
+
+    .menu-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--panel2);
+      color: var(--txt);
+      font-size: 18px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      flex: 0 0 auto;
+    }
+
+    .menu-btn:hover {
+      background: var(--panel3);
+      border-color: #3a3f52
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--panel2);
+      color: var(--txt-dim);
+      padding: 7px 13px;
+      border-radius: 9px;
+      transition: border-color .15s, color .15s, background .15s, transform .05s;
+    }
+
+    button:hover {
+      border-color: #3a3f52;
+      color: var(--txt);
+      background: var(--panel3)
+    }
+
+    button:active {
+      transform: scale(.98)
+    }
+
+    button.primary {
+      background: var(--grad);
+      border-color: transparent;
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 4px 14px -4px rgba(109, 91, 240, .55);
+    }
+
+    button.primary:hover {
+      filter: brightness(1.08);
+      border-color: transparent;
+      color: #fff
+    }
+
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      filter: none
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+      position: relative;
+      min-width: 0
+    }
+
+    .view {
+      display: none;
+      flex-direction: column;
+      min-height: 0;
+      min-width: 0;
+      flex: 1
+    }
+
+    .view.active {
+      display: flex
+    }
+
+    #chatView {
+      background: linear-gradient(180deg, var(--bg-2), var(--bg))
+    }
+
+    #panelView {
+      background: var(--bg-2)
+    }
+
+    #side {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 22px clamp(16px, 4vw, 40px) 40px
+    }
+
+    @media (min-width:1200px) {
+      #side {
+        padding-left: max(24px, calc((100% - 1100px)/2));
+        padding-right: max(24px, calc((100% - 1100px)/2))
+      }
+    }
+
+    #log {
+      flex: 1;
+      overflow: auto;
+      padding: 22px clamp(16px, 4vw, 40px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-x: hidden;
+    }
+
+    .onboarding-banner {
+      margin: 8px clamp(12px, 3vw, 32px) 0;
+      padding: 20px 22px;
+      background:
+        radial-gradient(600px 200px at 20% 0%, rgba(109, 91, 240, .18), transparent 70%),
+        linear-gradient(180deg, rgba(18, 37, 68, .55), rgba(8, 19, 38, .55));
+      border: 1px solid rgba(109, 91, 240, .35);
+      border-radius: 16px;
+      display: none;
+      gap: 16px;
+      align-items: flex-start;
+      box-shadow: 0 8px 30px -12px rgba(109, 91, 240, .5);
+      animation: obFadeIn .4s ease;
+    }
+
+    .onboarding-banner.show {
+      display: flex
+    }
+
+    @keyframes obFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-8px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .onboarding-banner .ob-icon {
+      flex: 0 0 auto;
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: var(--grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 6px 18px -6px rgba(109, 91, 240, .7);
+    }
+
+    .onboarding-banner .ob-body {
+      flex: 1;
+      min-width: 0
+    }
+
+    .onboarding-banner .ob-body h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--txt)
+    }
+
+    .onboarding-banner .ob-body p {
+      margin: 0 0 8px;
+      font-size: 13.5px;
+      color: var(--txt-dim);
+      line-height: 1.6
+    }
+
+    .onboarding-banner .ob-body p strong {
+      color: #fff;
+      font-weight: 600
+    }
+
+    .onboarding-banner .ob-note {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .onboarding-banner .ob-actions {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-self: center;
+    }
+
+    @media (max-width:819.98px) {
+      .onboarding-banner {
+        flex-direction: column
+      }
+
+      .onboarding-banner .ob-actions {
+        flex-direction: row;
+        width: 100%;
+        align-self: stretch
+      }
+
+      .onboarding-banner .ob-actions button {
+        flex: 1
+      }
+    }
+
+    #sendLockedHint {
+      display: none;
+      margin: 0 clamp(12px, 3vw, 32px) 4px;
+      padding: 8px 14px;
+      background: rgba(245, 165, 36, .08);
+      border: 1px solid rgba(245, 165, 36, .3);
+      border-radius: 10px;
+      font-size: 12px;
+      color: #fbbf24;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #sendLockedHint.show {
+      display: flex
+    }
+
+    #sendLockedHint button {
+      padding: 3px 10px;
+      font-size: 11.5px;
+      background: rgba(245, 165, 36, .15);
+      border-color: rgba(245, 165, 36, .4);
+      color: #fbbf24;
+    }
+
+    #sendLockedHint button:hover {
+      background: rgba(245, 165, 36, .25);
+      border-color: rgba(245, 165, 36, .6);
+      color: #ffd166;
+    }
+
+    .msg {
+      max-width: 78%;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 14.5px;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      min-width: 0;
+    }
+
+    .msg.user {
+      align-self: flex-end;
+      background: var(--grad);
+      color: #fff;
+      padding: 11px 16px;
+      border-radius: 18px 18px 4px 18px;
+      box-shadow: var(--shadow-sm);
+      max-width: min(78%, 640px);
+    }
+
+    .msg.final {
+      align-self: flex-start;
+      max-width: min(92%, 760px);
+      white-space: normal;
+      line-height: 1.65;
+      background: transparent;
+      padding: 2px 0 2px 40px;
+      position: relative;
+    }
+
+    .msg.final::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      background-color: var(--panel2);
+      background-image: url("img/hemmy.png");
+      background-size: 80%;
+      background-position: center;
+      background-repeat: no-repeat;
+      box-shadow: 0 0 0 1px var(--border), var(--shadow-sm);
+    }
+
+    .msg.error {
+      align-self: flex-start;
+      background: rgba(245, 87, 108, .10);
+      border: 1px solid rgba(245, 87, 108, .35);
+      color: #ffd6dc;
+      padding: 11px 15px;
+      border-radius: 14px;
+      max-width: min(92%, 760px);
+    }
+
+    .md {
+      min-width: 0;
+      max-width: 100%;
+      overflow-wrap: anywhere
+    }
+
+    .md>*:first-child {
+      margin-top: 0
+    }
+
+    .md>*:last-child {
+      margin-bottom: 0
+    }
+
+    .md p {
+      margin: 0 0 10px
+    }
+
+    .md h1,
+    .md h2,
+    .md h3,
+    .md h4 {
+      margin: 18px 0 8px;
+      font-weight: 700;
+      line-height: 1.3
+    }
+
+    .md h1 {
+      font-size: 19px
+    }
+
+    .md h2 {
+      font-size: 17px;
+      color: #f3f5fb
+    }
+
+    .md h3 {
+      font-size: 15px;
+      color: var(--txt-dim)
+    }
+
+    .md h4 {
+      font-size: 13.5px;
+      color: var(--muted)
+    }
+
+    .md strong {
+      color: #fff;
+      font-weight: 700
+    }
+
+    .md em {
+      color: var(--txt-dim)
+    }
+
+    .md ul,
+    .md ol {
+      margin: 0 0 10px;
+      padding-left: 22px
+    }
+
+    .md li {
+      margin: 4px 0
+    }
+
+    .md li::marker {
+      color: var(--accent-2)
+    }
+
+    .md a {
+      color: var(--accent-2);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(79, 140, 255, .3);
+      overflow-wrap: anywhere;
+    }
+
+    .md a:hover {
+      border-color: var(--accent-2)
+    }
+
+    .md hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 16px 0
+    }
+
+    .md blockquote {
+      margin: 0 0 10px;
+      padding: 4px 14px;
+      border-left: 3px solid var(--accent);
+      color: var(--txt-dim);
+      background: var(--panel2);
+      border-radius: 0 8px 8px 0
+    }
+
+    .md code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 1px 6px;
+      font: 12.5px/1.4 ui-monospace, Menlo, Consolas, monospace;
+      color: #f0b866;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .md pre.code {
+      margin: 10px 0;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 15px;
+      overflow: auto;
+      max-height: 420px;
+      max-width: 100%;
+      min-width: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .02)
+    }
+
+    .md pre.code code {
+      background: none;
+      border: 0;
+      padding: 0;
+      color: #d3d9e6;
+      white-space: pre;
+      display: block;
+      font-size: 12.5px;
+      line-height: 1.6
+    }
+
+    .md table {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      margin: 10px 0;
+      border-collapse: collapse;
+      font-size: 13px;
+      border-radius: 8px;
+    }
+
+    .md th,
+    .md td {
+      border: 1px solid var(--border);
+      padding: 7px 11px;
+      text-align: left
+    }
+
+    .md thead th {
+      background: var(--panel2);
+      color: #f3f5fb
+    }
+
+    .think-block {
+      align-self: flex-start;
+      max-width: min(92%, 760px);
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--panel);
+      overflow: hidden;
+      transition: border-color .2s;
+      box-shadow: var(--shadow-sm);
+      min-width: 0;
+    }
+
+    .think-block.running {
+      border-color: rgba(109, 91, 240, .45)
+    }
+
+    .think-block.done {
+      border-color: var(--border-soft)
+    }
+
+    .think-block.failed {
+      border-color: rgba(245, 87, 108, .45)
+    }
+
+    .think-block>summary {
+      padding: 9px 13px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+      color: var(--txt-dim);
+      font-size: 13px;
+      line-height: 1.4;
+      transition: background .15s;
+      min-width: 0;
+    }
+
+    .think-block>summary::-webkit-details-marker {
+      display: none
+    }
+
+    .think-block>summary:hover {
+      background: var(--panel2)
+    }
+
+    .think-block[open]>summary {
+      border-bottom: 1px solid var(--border-soft)
+    }
+
+    .think-ic {
+      flex: 0 0 auto;
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+    }
+
+    .think-live {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--txt-dim);
+    }
+
+    .think-block.running .think-live {
+      color: var(--txt)
+    }
+
+    .think-chev {
+      flex: 0 0 auto;
+      font-size: 10px;
+      color: var(--muted);
+      transition: transform .2s
+    }
+
+    .think-block[open] .think-chev {
+      transform: rotate(180deg)
+    }
+
+    .think-steps {
+      padding: 6px 0;
+      max-height: 420px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      font-size: 12.5px;
+      min-width: 0;
+    }
+
+    .think-step {
+      padding: 7px 14px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      color: var(--txt-dim);
+      line-height: 1.55;
+      min-width: 0;
+    }
+
+    .think-step+.think-step {
+      border-top: 1px solid var(--border-soft)
+    }
+
+    .think-step .si {
+      flex: 0 0 auto;
+      width: 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      padding-top: 1px;
+    }
+
+    .think-step .st {
+      flex: 1;
+      min-width: 0;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    details.action-step {
+      border-top: 1px solid var(--border-soft)
+    }
+
+    details.action-step:first-child {
+      border-top: 0
+    }
+
+    details.action-step>summary {
+      padding: 8px 14px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+      color: var(--txt-dim);
+      min-width: 0;
+    }
+
+    details.action-step>summary::-webkit-details-marker {
+      display: none
+    }
+
+    details.action-step>summary:hover {
+      background: var(--panel2)
+    }
+
+    details.action-step .si {
+      flex: 0 0 auto;
+      width: 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    details.action-step .st {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    details.action-step .st b {
+      color: var(--txt);
+      font-weight: 600
+    }
+
+    details.action-step .sb {
+      display: inline-block;
+      margin-left: 6px;
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    details.action-step .sb.w {
+      color: #fbbf24;
+      border-color: #4a3a17;
+      background: rgba(245, 165, 36, .08)
+    }
+
+    details.action-step .sc {
+      flex: 0 0 auto;
+      font-size: 10px;
+      color: var(--muted);
+      transition: transform .2s;
+    }
+
+    details.action-step[open] .sc {
+      transform: rotate(180deg)
+    }
+
+    details.action-step.running .si {
+      color: var(--accent)
+    }
+
+    details.action-step.done .si {
+      color: #4ade80
+    }
+
+    details.action-step.failed .si {
+      color: #f87171
+    }
+
+    .step-body {
+      padding: 0 14px 12px 40px;
+      min-width: 0;
+      max-width: 100%
+    }
+
+    .step-label {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--muted);
+      margin: 10px 0 6px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .step-label:first-child {
+      margin-top: 0
+    }
+
+    .lang-badge {
+      font-size: 9.5px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: var(--panel3);
+      color: var(--muted);
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+
+    pre.code-block {
+      margin: 0;
+      padding: 12px 14px;
+      background: var(--code-bg-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: auto;
+      max-height: 360px;
+      max-width: 100%;
+      min-width: 0;
+      font: 12.5px/1.65 ui-monospace, Menlo, Consolas, "Cascadia Code", monospace;
+      white-space: pre;
+      color: #d3d9e6;
+      tab-size: 2;
+    }
+
+    pre.code-block::-webkit-scrollbar {
+      width: 8px;
+      height: 8px
+    }
+
+    pre.code-block::-webkit-scrollbar-thumb {
+      background: var(--panel3);
+      border-radius: 4px
+    }
+
+    .tok-key {
+      color: var(--tok-key)
+    }
+
+    .tok-str {
+      color: var(--tok-str)
+    }
+
+    .tok-num {
+      color: var(--tok-num)
+    }
+
+    .tok-bool {
+      color: var(--tok-bool)
+    }
+
+    .tok-kw {
+      color: var(--tok-kw);
+      font-weight: 600
+    }
+
+    .tok-fn {
+      color: var(--tok-fn)
+    }
+
+    .tok-comment {
+      color: var(--tok-comment);
+      font-style: italic
+    }
+
+    .tok-punct {
+      color: var(--tok-punct)
+    }
+
+    .tok-plain {
+      color: #d3d9e6
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    #chatStatusWrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 clamp(12px, 3vw, 32px);
+      height: 0;
+      pointer-events: none;
+      transition: height .2s ease;
+    }
+
+    #chatStatusWrap.visible {
+      height: 30px
+    }
+
+    .chat-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 5px 14px;
+      background: rgba(18, 20, 28, .85);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--txt-dim);
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow-sm);
+      max-width: min(90%, 620px);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity .22s ease, transform .22s ease;
+    }
+
+    #chatStatusWrap.visible .chat-status {
+      opacity: 1;
+      transform: translateY(0)
+    }
+
+    .chat-status .status-dot {
+      flex: 0 0 auto;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 0 rgba(109, 91, 240, .7);
+      animation: statusPulse 1.6s infinite;
+    }
+
+    @keyframes statusPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(109, 91, 240, .55)
+      }
+
+      70% {
+        box-shadow: 0 0 0 8px rgba(109, 91, 240, 0)
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(109, 91, 240, 0)
+      }
+    }
+
+    .chat-status .status-text {
+      flex: 0 1 auto;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    #inputbar {
+      display: flex;
+      gap: 9px;
+      padding: 11px 13px;
+      margin: 12px clamp(12px, 3vw, 32px) 16px;
+      margin-bottom: calc(16px + env(safe-area-inset-bottom));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--panel2);
+      align-items: flex-end;
+      box-shadow: var(--shadow-md);
+      transition: border-color .15s, box-shadow .15s;
+      min-width: 0;
+    }
+
+    #inputbar:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow-md)
+    }
+
+    #attach {
+      background: transparent;
+      border: 0;
+      color: var(--muted);
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-size: 17px;
+      cursor: pointer;
+      line-height: 1;
+      flex: 0 0 auto;
+    }
+
+    #attach:hover {
+      background: var(--panel3);
+      color: var(--txt)
+    }
+
+    #attachments {
+      display: none;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 0 clamp(12px, 3vw, 32px);
+    }
+
+    #attachments .chip {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 3px 10px;
+      font-size: 12.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
+    #attachments .chip-x {
+      color: var(--muted);
+      text-decoration: none
+    }
+
+    #attachments .chip-x:hover {
+      color: var(--txt)
+    }
+
+    #q {
+      flex: 1;
+      resize: none;
+      background: transparent;
+      border: 0;
+      color: var(--txt);
+      padding: 8px 4px;
+      font: inherit;
+      font-size: 14.5px;
+      max-height: 160px;
+      min-width: 0;
+    }
+
+    #q::placeholder {
+      color: var(--muted)
+    }
+
+    #q:focus {
+      outline: none
+    }
+
+    #send {
+      border-radius: 14px;
+      padding: 9px 18px;
+      flex: 0 0 auto
+    }
+
+    #stop {
+      background: rgba(245, 87, 108, .12);
+      border: 1px solid rgba(245, 87, 108, .4);
+      color: #f5576c;
+      padding: 9px 14px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1;
+      flex: 0 0 auto;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+
+    #stop:hover {
+      background: rgba(245, 87, 108, .22);
+      border-color: rgba(245, 87, 108, .6);
+      color: #ff8fa3;
+    }
+
+    #stop:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-sm);
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 6px 9px;
+      border-bottom: 1px solid var(--border-soft);
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600
+    }
+
+    .pill {
+      font-size: 11px;
+      padding: 2px 9px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      font-weight: 500;
+    }
+
+    .pill.success {
+      color: var(--ok);
+      border-color: #1c3a28;
+      background: rgba(34, 197, 94, .08)
+    }
+
+    .pill.error {
+      color: var(--err);
+      border-color: #4a2130;
+      background: rgba(245, 87, 108, .08)
+    }
+
+    .pill.denied {
+      color: var(--warn);
+      border-color: #4a3a17;
+      background: rgba(245, 165, 36, .08)
+    }
+
+    .pill.primary {
+      color: var(--accent-2);
+      border-color: #243456;
+      background: rgba(79, 140, 255, .08)
+    }
+
+    .mermaid {
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px;
+      overflow: auto;
+      max-width: 100%
+    }
+
+    .empty {
+      color: var(--muted);
+      font-style: italic;
+      padding: 8px
+    }
+
+    .toolsum {
+      color: var(--muted);
+      font-size: 12.5px;
+      margin-bottom: 8px
+    }
+
+    #toolsearch {
+      width: 100%;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      color: var(--txt);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font: inherit;
+    }
+
+    #toolsearch:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft)
+    }
+
+    .tooldom h3 .cnt {
+      color: var(--muted);
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0
+    }
+
+    .toolrow {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-soft)
+    }
+
+    .toolrow:last-child {
+      border-bottom: 0
+    }
+
+    .toolhd {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px
+    }
+
+    .toolhd code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 1px 6px;
+      font: 12px/1.4 ui-monospace, Menlo, Consolas, monospace;
+      color: #f0b866;
+      overflow-wrap: anywhere;
+    }
+
+    .tooldoc {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 3px;
+      overflow-wrap: anywhere
+    }
+
+    .pill.r {
+      color: var(--muted)
+    }
+
+    .pill.w {
+      color: var(--write);
+      border-color: #4a3a17;
+      background: rgba(245, 165, 36, .08)
+    }
+
+    .pill.p {
+      color: var(--accent-2);
+      border-color: #243456;
+      background: rgba(79, 140, 255, .08)
+    }
+
+    .set-label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 14px 0 5px;
+      font-weight: 500
+    }
+
+    .set-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--panel2);
+      color: var(--txt);
+      font: inherit;
+      font-size: 13.5px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    .set-input::placeholder {
+      color: var(--muted)
+    }
+
+    .set-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft)
+    }
+
+    select.set-input {
+      appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23838b9c' stroke-width='2.5'><path d='M6 9l6 6 6-6'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 34px;
+    }
+
+    .set-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 18px;
+      flex-wrap: wrap
+    }
+
+    .set-msg {
+      margin-top: 12px;
+      font-size: 12.5px;
+      min-height: 14px
+    }
+
+    .set-msg.ok {
+      color: var(--ok)
+    }
+
+    .set-msg.err {
+      color: var(--err)
+    }
+
+    .set-section {
+      margin-bottom: 22px
+    }
+
+    .set-section-hd {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .set-section-hd .ic {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: var(--panel3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex: 0 0 auto;
+    }
+
+    .set-section-hd .ttl {
+      flex: 1;
+      min-width: 0
+    }
+
+    .set-section-hd .ttl h4 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--txt);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .set-section-hd .ttl p {
+      margin: 2px 0 0;
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.4
+    }
+
+    .llm-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px
+    }
+
+    .llm-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--panel2);
+      padding: 12px 14px;
+      transition: border-color .15s;
+      min-width: 0;
+    }
+
+    .llm-card.is-primary {
+      border-color: rgba(79, 140, 255, .35);
+      background: rgba(79, 140, 255, .05)
+    }
+
+    .llm-card-hd {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px
+    }
+
+    .llm-card-hd .cn {
+      font-weight: 600;
+      font-size: 13.5px;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .llm-card-hd .badge-primary {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(79, 140, 255, .12);
+      color: var(--accent-2);
+      border: 1px solid rgba(79, 140, 255, .3);
+      flex: 0 0 auto;
+    }
+
+    .llm-card-hd .badge-fallback {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(131, 139, 156, .08);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      flex: 0 0 auto;
+    }
+
+    .llm-card .meta {
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 8px;
+      overflow-wrap: anywhere;
+    }
+
+    .llm-card .meta code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0 5px;
+      font-size: 11px;
+      color: #f0b866;
+      overflow-wrap: anywhere;
+    }
+
+    .llm-card .card-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap
+    }
+
+    .llm-card .card-actions button {
+      font-size: 11.5px;
+      padding: 5px 11px
+    }
+
+    .set-empty {
+      padding: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12.5px;
+      font-style: italic;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+    }
+
+    .conn-block {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--panel2);
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      min-width: 0;
+    }
+
+    .conn-block .conn-hd {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px
+    }
+
+    .conn-block .conn-hd .ci {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: var(--panel3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex: 0 0 auto;
+    }
+
+    .conn-block .conn-hd .cn {
+      font-weight: 600;
+      font-size: 13.5px;
+      flex: 1;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .conn-block .conn-hd .st {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+      flex: 0 0 auto;
+    }
+
+    .conn-block .conn-hd .st.on {
+      background: var(--ok);
+      box-shadow: 0 0 8px rgba(34, 197, 94, .6)
+    }
+
+    .conn-block .conn-hd .st.wait {
+      background: var(--warn);
+      animation: pulse 1.2s infinite
+    }
+
+    @keyframes pulse {
+      50% {
+        opacity: .4
+      }
+    }
+
+    .conn-block .conn-msg {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 8px;
+      overflow-wrap: anywhere;
+    }
+
+    .conn-block .conn-msg a {
+      color: var(--accent-2);
+      text-decoration: none;
+      overflow-wrap: anywhere
+    }
+
+    .conn-block .conn-msg code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0 4px;
+      font-size: 11px;
+      color: #f0b866;
+      overflow-wrap: anywhere;
+    }
+
+    .conn-block .conn-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap
+    }
+
+    .conn-block .conn-actions button {
+      font-size: 12px;
+      padding: 6px 12px
+    }
+
+    .conn-block .device-code {
+      font: 600 18px/1 ui-monospace, monospace;
+      letter-spacing: 3px;
+      padding: 8px 12px;
+      background: var(--panel);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      display: inline-block;
+      margin-top: 6px;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 7, 11, .55);
+      backdrop-filter: blur(2px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+      z-index: 60;
+    }
+
+    .drawer-overlay.show {
+      opacity: 1;
+      pointer-events: auto
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(400px, 92vw);
+      max-width: 100vw;
+      background: var(--panel);
+      border-left: 1px solid var(--border);
+      transform: translateX(100%);
+      transition: transform .28s cubic-bezier(.4, 0, .2, 1);
+      z-index: 70;
+      display: flex;
+      flex-direction: column;
+      box-shadow: -10px 0 40px rgba(0, 0, 0, .5);
+    }
+
+    .drawer.open {
+      transform: translateX(0)
+    }
+
+    .drawer-head {
+      padding: 18px;
+      border-bottom: 1px solid var(--border-soft);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .drawer-head .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      flex: 0 0 auto;
+      background: var(--grad);
+      color: #fff;
+      font-weight: 700;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .drawer-head .uinfo {
+      min-width: 0;
+      flex: 1
+    }
+
+    .drawer-head .uname {
+      font-weight: 600;
+      font-size: 14.5px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .drawer-head .urole {
+      font-size: 11.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .drawer-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: var(--panel2);
+      color: var(--muted);
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+
+    .drawer-close:hover {
+      color: var(--txt);
+      background: var(--panel3)
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 8px 0
+    }
+
+    .drawer-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 0 10px
+    }
+
+    .drawer-nav button {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 0;
+      background: transparent;
+      color: var(--txt-dim);
+      text-align: left;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: background .15s, color .15s;
+    }
+
+    .drawer-nav button:hover {
+      background: var(--panel2);
+      color: var(--txt)
+    }
+
+    .drawer-nav button.active {
+      background: var(--accent-soft);
+      color: var(--txt)
+    }
+
+    .drawer-nav button .ic {
+      font-size: 16px;
+      width: 20px;
+      text-align: center
+    }
+
+    .drawer-foot {
+      padding: 12px 18px;
+      border-top: 1px solid var(--border-soft)
+    }
+
+    .drawer-foot button {
+      width: 100%;
+      padding: 10px;
+      font-size: 13px
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 7, 11, .72);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 80;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .overlay.show {
+      display: flex
+    }
+
+    .modal {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      width: min(720px, 92vw);
+      max-height: 88vh;
+      overflow: auto;
+      padding: 24px 24px 22px;
+      box-shadow: var(--shadow-md);
+      min-width: 0;
+    }
+
+    .modal h2 {
+      margin: 0 0 6px;
+      font-size: 17px;
+      font-weight: 700
+    }
+
+    .modal .sub {
+      color: var(--muted);
+      font-size: 12.5px;
+      margin-bottom: 18px;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+    }
+
+    .modal .sub strong {
+      color: var(--txt-dim)
+    }
+
+    .modal .sub a {
+      color: var(--accent-2);
+      text-decoration: none;
+      overflow-wrap: anywhere
+    }
+
+    .modal .sub code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0 4px;
+      font-size: 11px;
+      color: #f0b866;
+      overflow-wrap: anywhere;
+    }
+
+    .modal .row {
+      display: flex;
+      gap: 9px;
+      justify-content: flex-end;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .modal input[type=password],
+    .modal input[type=text],
+    .modal select,
+    .modal textarea {
+      width: 100%;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      color: var(--txt);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+      min-width: 0;
+    }
+
+    .modal input:focus,
+    .modal select:focus,
+    .modal textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .modal label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 12px 0 5px;
+      font-weight: 500;
+    }
+
+    .modal select {
+      appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23838b9c' stroke-width='2.5'><path d='M6 9l6 6 6-6'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 34px;
+    }
+
+    .modal textarea {
+      font: 12px/1.5 ui-monospace, Menlo, Consolas, monospace;
+      resize: vertical;
+      min-height: 140px;
+    }
+
+    .modal .check-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px
+    }
+
+    .modal .check-row input[type=checkbox] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+
+    .modal .check-row label {
+      margin: 0;
+      font-size: 12.5px;
+      color: var(--txt-dim);
+      cursor: pointer
+    }
+
+    .ap-section {
+      margin-bottom: 16px
+    }
+
+    .ap-section:last-of-type {
+      margin-bottom: 0
+    }
+
+    .ap-label {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 7px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ap-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      background: rgba(245, 165, 36, .08);
+      border: 1px solid rgba(245, 165, 36, .35);
+      border-radius: 8px;
+      font: 13px ui-monospace, Menlo, Consolas, monospace;
+      color: #fbbf24;
+      word-break: break-all;
+      max-width: 100%;
+    }
+
+    .ap-action::before {
+      content: "⚠";
+      font-size: 12px
+    }
+
+    .write-hint {
+      margin-top: 16px;
+      padding: 10px 12px;
+      background: rgba(245, 165, 36, .06);
+      border: 1px solid rgba(245, 165, 36, .2);
+      border-radius: 10px;
+      color: #fbbf24;
+      font-size: 12px;
+    }
+
+    .secnote {
+      font-size: 12px;
+      color: var(--warn);
+      margin-top: 9px
+    }
+
+    #toolsChangedToast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      left: auto;
+      background: var(--panel);
+      color: var(--txt);
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      padding: 12px 16px;
+      max-width: min(340px, calc(100vw - 40px));
+      z-index: 9999;
+      font-size: 13px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .4);
+    }
+
+    #toolsChangedToast button {
+      margin-top: 8px;
+      padding: 5px 10px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+    }
+
+    @media (min-width:1600px) {
+      #log {
+        padding-left: max(20px, calc((100% - 1200px)/2));
+        padding-right: max(20px, calc((100% - 1200px)/2));
+      }
+
+      #inputbar {
+        margin-left: max(clamp(12px, 3vw, 32px), calc((100% - 1200px)/2));
+        margin-right: max(clamp(12px, 3vw, 32px), calc((100% - 1200px)/2));
+      }
+    }
+
+    @media (max-width: 1024px) {
+
+      #q,
+      #secInput,
+      #toolsearch,
+      .modal input[type=password],
+      .modal input[type=text],
+      .modal select,
+      .modal textarea,
+      .set-input,
+      select.set-input {
+        font-size: 16px !important;
+        line-height: 1.35;
+      }
+    }
+
+    @media (max-width: 819.98px) {
+      header {
+        padding: 10px 14px
+      }
+
+      .modal {
+        width: 94vw;
+        padding: 20px 18px;
+        max-height: 92vh
+      }
+
+      .msg.user {
+        max-width: 88%
+      }
+
+      .msg.final,
+      .think-block {
+        max-width: 100%
+      }
+
+      #inputbar {
+        margin: 10px 10px 14px;
+        margin-bottom: calc(14px + env(safe-area-inset-bottom))
+      }
+
+      #side {
+        padding: 18px 14px 28px
+      }
+    }
+
+    @media (max-width: 559.98px) {
+      header {
+        gap: 8px;
+        padding: 9px 12px
+      }
+
+      header .brand .slogan,
+      header .view-title {
+        display: none
+      }
+
+      #log {
+        padding: 14px 10px;
+        gap: 12px
+      }
+
+      #inputbar {
+        padding: 8px 8px;
+        gap: 6px;
+        margin: 8px 8px 10px;
+        margin-bottom: calc(10px + env(safe-area-inset-bottom));
+        border-radius: 16px;
+      }
+
+      #attach {
+        padding: 8px 6px;
+        font-size: 16px
+      }
+
+      #send {
+        padding: 8px 12px;
+        border-radius: 12px
+      }
+
+      #stop {
+        padding: 8px 10px;
+        border-radius: 12px
+      }
+
+      #side {
+        padding: 14px 10px 28px
+      }
+
+      .drawer {
+        width: 100vw
+      }
+
+      .drawer-head {
+        padding: 14px
+      }
+
+      .drawer-head .avatar {
+        width: 38px;
+        height: 38px;
+        font-size: 16px
+      }
+
+      pre.code-block,
+      .md pre.code {
+        font-size: 11.5px;
+        padding: 10px 11px
+      }
+
+      .chat-status {
+        font-size: 11px;
+        padding: 4px 10px
+      }
+
+      .onboarding-banner {
+        padding: 14px 14px;
+        margin: 8px 10px 0
+      }
+
+      .onboarding-banner .ob-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px
+      }
+
+      .msg.final {
+        padding-left: 34px
+      }
+
+      .msg.final::before {
+        width: 24px;
+        height: 24px
+      }
+
+      .think-steps {
+        max-height: 55vh
+      }
+
+      #toolsChangedToast {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        max-width: none
+      }
+    }
+
+    @media (max-width: 379.98px) {
+      #q {
+        font-size: 16px
+      }
+
+      .msg.user {
+        max-width: 94%
+      }
+
+      .md h1 {
+        font-size: 17px
+      }
+
+      .md h2 {
+        font-size: 15.5px
+      }
+
+      .md h3 {
+        font-size: 14px
+      }
+
+      .md table {
+        font-size: 12px
+      }
+
+      .modal {
+        padding: 16px 14px
+      }
+
+      .overlay {
+        padding: 12px
+      }
+
+      .step-body {
+        padding: 0 10px 12px 26px
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="brand">
+      <img class="logo" src="img/hemmy.png" onerror="this.style.display='none'" />
+      <div class="brandtxt">
+        <h1>Hemmy</h1>
+        <div class="slogan">You Think, It Builds.</div>
+      </div>
+    </div>
+    <div class="grow"></div>
+    <span class="view-title" id="viewTitle"></span>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+  </header>
+
+  <main>
+    <section class="view active" id="chatView">
+      <div class="onboarding-banner" id="onboardingBanner">
+        <div class="ob-icon">👋</div>
+        <div class="ob-body">
+          <h3>Ciao, sono Hemmy!</h3>
+          <p>
+            Sono il tuo AI agent per l'infrastruttura. Per iniziare a lavorare insieme
+            devi configurare almeno una <strong>API key LLM</strong>: la userò per ragionare,
+            pianificare e costruire per te.
+          </p>
+          <p class="ob-note">
+            🔒 La chiave è cifrata a riposo, mai condivisa tra utenti, mai inviata al modello.
+            Puoi configurarne più di una (una primaria e alcune di fallback).
+          </p>
+        </div>
+        <div class="ob-actions">
+          <button class="primary" id="obGoSettings">Configura ora</button>
+          <button id="obDismiss">Più tardi</button>
+        </div>
+      </div>
+
+      <div id="log"></div>
+      <div id="attachments"></div>
+      <div id="sendLockedHint">
+        <span>🔒</span>
+        <span>Prima di poter inviare messaggi, configura una API key LLM.</span>
+        <button id="lockGoSettings">Apri Impostazioni</button>
+      </div>
+      <div id="chatStatusWrap">
+        <div class="chat-status" role="status" aria-live="polite">
+          <span class="status-dot"></span>
+          <span class="status-text" id="statusText">idle</span>
+        </div>
+      </div>
+      <div id="inputbar">
+        <input type="file" id="fileInput" style="display:none">
+        <button id="attach" title="Allega file">📎</button>
+        <textarea id="q" rows="1" placeholder="Chiedi qualcosa all'agente…"></textarea>
+        <button id="stop" title="Interrompi elaborazione" style="display:none">■</button>
+        <button class="primary" id="send">Invia</button>
+      </div>
+    </section>
+
+    <section class="view" id="panelView">
+      <div id="side"></div>
+    </section>
+  </main>
+
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawer-head">
+      <div class="avatar" id="userAvatar">?</div>
+      <div class="uinfo">
+        <div class="uname" id="userName">—</div>
+        <div class="urole" id="userRole">—</div>
+      </div>
+      <button class="drawer-close" id="drawerClose" aria-label="Chiudi">✕</button>
+    </div>
+
+    <div class="drawer-body">
+      <nav class="drawer-nav">
+        <button data-view="chat" class="active"><span class="ic">💬</span> Chat</button>
+        <button data-view="tools"><span class="ic">🔧</span> Tools</button>
+        <button data-view="history"><span class="ic">📜</span> Storico</button>
+        <button data-view="settings"><span class="ic">⚙️</span> Impostazioni</button>
+      </nav>
+    </div>
+
+    <div class="drawer-foot">
+      <button id="logoutBtn">🚪 Esci</button>
+    </div>
+  </aside>
+
+  <!-- ============ Modal: aggiungi/modifica provider LLM ============ -->
+  <div class="overlay" id="llmModalOverlay">
+    <div class="modal">
+      <h2 id="llmModalTitle">Aggiungi provider LLM</h2>
+      <div class="sub">
+        La chiave è cifrata a riposo e usata solo per costruire il client LLM.
+        Non viene mai inviata al modello né condivisa con altri utenti.
+      </div>
+      <label for="llmProvider">Provider</label>
+      <select id="llmProvider"></select>
+      <label for="llmModel">Modello <span style="color:var(--muted);font-weight:400">(opzionale)</span></label>
+      <input id="llmModel" type="text" placeholder="es. deepseek-chat, gpt-4o, claude-3-5-sonnet" />
+      <label for="llmBaseUrl">Base URL <span style="color:var(--muted);font-weight:400">(opzionale, per provider
+          locali)</span></label>
+      <input id="llmBaseUrl" type="text" placeholder="es. http://localhost:11434/v1 (Ollama)" />
+      <label for="llmApiKey">API key</label>
+      <input id="llmApiKey" type="password" autocomplete="off" placeholder="incolla qui la tua API key" />
+      <div class="set-msg" id="llmModalMsg"></div>
+      <div class="row">
+        <button id="llmModalCancel">Annulla</button>
+        <button class="primary" id="llmModalSave">Salva</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Modal: AWS SSO ============ -->
+  <div class="overlay" id="awsSsoModalOverlay">
+    <div class="modal">
+      <h2>Connetti AWS (SSO)</h2>
+      <div class="sub">
+        Inserisci l'URL del portale SSO della tua organizzazione (es.
+        <code>https://azienda.awsapps.com/start</code>). Richiede che la tua
+        organizzazione abbia <strong>AWS IAM Identity Center</strong> attivo.
+        Se non ce l'hai, usa le chiavi statiche come fallback.
+      </div>
+      <label for="awsSsoStartUrl">Start URL</label>
+      <input id="awsSsoStartUrl" type="text" autocomplete="off" placeholder="https://azienda.awsapps.com/start" />
+      <label for="awsSsoRegion">Region</label>
+      <input id="awsSsoRegion" type="text" placeholder="eu-west-1" value="eu-west-1" />
+      <div class="set-msg" id="awsSsoModalMsg"></div>
+      <div class="row">
+        <button id="awsSsoModalCancel">Annulla</button>
+        <button class="primary" id="awsSsoModalSave">Connetti</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Modal: AWS chiavi statiche ============ -->
+  <div class="overlay" id="awsModalOverlay">
+    <div class="modal">
+      <h2>Connetti AWS (chiavi statiche)</h2>
+      <div class="sub">
+        Fallback per chi non ha AWS IAM Identity Center (SSO). Le credenziali sono
+        cifrate a riposo e usate solo per costruire il client AWS. Consiglio: crea un
+        IAM user dedicato con permessi minimi.
+      </div>
+      <label for="awsAccessKeyId">Access Key ID</label>
+      <input id="awsAccessKeyId" type="text" autocomplete="off" placeholder="AKIA…" />
+      <label for="awsSecretAccessKey">Secret Access Key</label>
+      <input id="awsSecretAccessKey" type="password" autocomplete="off" placeholder="incolla qui la secret" />
+      <label for="awsSessionToken">Session Token <span style="color:var(--muted);font-weight:400">(opzionale, solo per
+          credenziali temporanee)</span></label>
+      <input id="awsSessionToken" type="password" autocomplete="off"
+        placeholder="lascia vuoto se usi credenziali permanenti" />
+      <label for="awsRegion">Region</label>
+      <input id="awsRegion" type="text" placeholder="eu-west-1" value="eu-west-1" />
+      <div class="set-msg" id="awsModalMsg"></div>
+      <div class="row">
+        <button id="awsModalCancel">Annulla</button>
+        <button class="primary" id="awsModalSave">Salva</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Modal: Azure DevOps ============ -->
+  <div class="overlay" id="azdoModalOverlay">
+    <div class="modal">
+      <h2>Configura Azure DevOps</h2>
+      <div class="sub">
+        Azure DevOps <strong>riusa la sessione Azure</strong>: connetti prima Azure
+        (stesso account Microsoft), poi indica qui il nome della tua organization
+        (es. <code>mycompany</code> — senza <code>dev.azure.com</code>).
+      </div>
+      <label for="azdoOrganization">Organization</label>
+      <input id="azdoOrganization" type="text" autocomplete="off" placeholder="mycompany" />
+      <div class="set-msg" id="azdoModalMsg"></div>
+      <div class="row">
+        <button id="azdoModalCancel">Annulla</button>
+        <button class="primary" id="azdoModalSave">Salva</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Modal: GitHub (BYOK OAuth App) ============ -->
+  <div class="overlay" id="githubModalOverlay">
+    <div class="modal">
+      <h2>Configura GitHub OAuth (BYOK)</h2>
+      <div class="sub">
+        GitHub non permette connessioni anonime: serve una <strong>OAuth App</strong>
+        creata sul tuo account. Il Client ID non è un segreto e resta salvato solo
+        sul tuo profilo Hemmy.
+        <br><br>
+        <strong>1.</strong> Vai su
+        <a href="https://github.com/settings/developers" target="_blank" rel="noopener">GitHub → Developer settings →
+          OAuth Apps</a>.<br>
+        <strong>2.</strong> Crea una nuova OAuth App (nome a piacere, homepage qualsiasi).<br>
+        <strong>3.</strong> Apri l'app e abilita <strong>Device Flow</strong>.<br>
+        <strong>4.</strong> Copia il <strong>Client ID</strong> e incollalo qui sotto.
+      </div>
+      <label for="githubClientId">Client ID</label>
+      <input id="githubClientId" type="text" autocomplete="off" placeholder="Ov23li…" />
+      <div class="set-msg" id="githubModalMsg"></div>
+      <div class="row">
+        <button id="githubModalCancel">Annulla</button>
+        <button class="primary" id="githubModalSave">Salva</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Modal: Airflow (orchestratore) ============ -->
+  <div class="overlay" id="airflowModalOverlay">
+    <div class="modal">
+      <h2>Connetti Airflow</h2>
+      <div class="sub">
+        Supporta <strong>Basic Auth</strong> (Airflow 2.x self-hosted) e
+        <strong>Bearer Token</strong> (Airflow 3.x, Astronomer, MWAA con token).
+        La connessione viene <strong>testata al salvataggio</strong> chiamando
+        <code>/api/v1/health</code>: se fallisce, non salviamo nulla.
+      </div>
+
+      <label for="airflowBaseUrl">Base URL</label>
+      <input id="airflowBaseUrl" type="text" autocomplete="off" placeholder="https://airflow.mycompany.com" />
+
+      <label for="airflowAuthMode">Modalità di autenticazione</label>
+      <select id="airflowAuthMode">
+        <option value="basic">Basic Auth (username + password)</option>
+        <option value="token">Bearer Token (API key / JWT)</option>
+      </select>
+
+      <div id="airflowBasicFields">
+        <label for="airflowUsername">Username</label>
+        <input id="airflowUsername" type="text" autocomplete="username" placeholder="admin" />
+        <label for="airflowPassword">Password</label>
+        <input id="airflowPassword" type="password" autocomplete="current-password" placeholder="incolla la password" />
+      </div>
+
+      <div id="airflowTokenFields" style="display:none">
+        <label for="airflowToken">Token</label>
+        <input id="airflowToken" type="password" autocomplete="off" placeholder="incolla il Bearer token" />
+      </div>
+
+      <div class="check-row">
+        <input type="checkbox" id="airflowVerifySsl" checked />
+        <label for="airflowVerifySsl">Verifica certificato SSL (disattiva solo per self-signed in sviluppo)</label>
+      </div>
+
+      <div class="set-msg" id="airflowModalMsg"></div>
+
+      <div class="row">
+        <button id="airflowModalCancel">Annulla</button>
+        <button class="primary" id="airflowModalSave">Testa e salva</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="approveOverlay">
+    <div class="modal">
+      <h2>🔐 Approvazione richiesta</h2>
+      <div class="sub">
+        Questa azione <strong>modifica</strong> una risorsa reale.
+        Verifica i parametri e l'anteprima prima di confermare.
+      </div>
+      <div class="ap-section">
+        <div class="ap-label">Azione</div>
+        <div class="ap-action" id="apAction"></div>
+      </div>
+      <div class="ap-section">
+        <div class="ap-label">Parametri <span class="lang-badge" id="apArgsLang">json</span></div>
+        <pre class="code-block" id="apArgs"></pre>
+      </div>
+      <div class="ap-section" id="apPreviewWrap" style="display:none">
+        <div class="ap-label">Anteprima delle modifiche <span class="lang-badge" id="apPreviewLang">text</span></div>
+        <pre class="code-block" id="apPreview"></pre>
+      </div>
+      <div class="write-hint">
+        ⚠️ Impatto: modifica infrastruttura reale. L'operazione sarà registrata nell'audit log.
+      </div>
+      <div class="row">
+        <button id="apDeny">Annulla</button>
+        <button class="primary" id="apApprove">Approva ed esegui</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="secretOverlay">
+    <div class="modal">
+      <h2>🔑 Input sicuro</h2>
+      <div class="sub" id="secLabel"></div>
+      <input type="password" id="secInput" autocomplete="off"
+        placeholder="Incolla il valore e premi Invio (vuoto = annulla)" />
+      <div class="secnote">
+        Il valore NON viene mostrato, salvato o passato al modello LLM.
+        Resta locale, usato solo per questa operazione.
+      </div>
+      <div class="row">
+        <button id="secCancel">Annulla</button>
+        <button class="primary" id="secOk">Conferma</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = s => document.querySelector(s);
+    const log = $("#log");
+
+    const AppState = {
+      me: null,
+      llmProvidersCatalog: null,
+      connections: null,
+      hasAnyLLMKey: false,
+      busy: false,
+    };
+
+    /* =========================================================
+       MARKDOWN
+       ========================================================= */
+    function esc(s) { return (s || "").replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
+    function inline(t) {
+      t = esc(t);
+      t = t.replace(/`([^`]+)`/g, (m, c) => "<code>" + c + "</code>");
+      t = t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+      t = t.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+      t = t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,
+        (m, txt, url) => '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + txt + '</a>');
+      return t;
+    }
+    function mdToHtml(src) {
+      const lines = (src || "").replace(/\r\n/g, "\n").split("\n");
+      let html = "", i = 0;
+      while (i < lines.length) {
+        let line = lines[i];
+        if (/^\s*```/.test(line)) {
+          i++; let code = [];
+          while (i < lines.length && !/^\s*```/.test(lines[i])) { code.push(lines[i]); i++; }
+          i++;
+          html += '<pre class="code"><code>' + esc(code.join("\n")) + "</code></pre>";
+          continue;
+        }
+        if (/^\s*$/.test(line)) { i++; continue; }
+        let h = line.match(/^(#{1,4})\s+(.*)$/);
+        if (h) { const n = h[1].length; html += "<h" + n + ">" + inline(h[2]) + "</h" + n + ">"; i++; continue; }
+        if (/^\s*---+\s*$/.test(line)) { html += "<hr>"; i++; continue; }
+        if (line.indexOf("|") >= 0 && i + 1 < lines.length && /^\s*\|?[\s:|-]+\|[\s:|-]+$/.test(lines[i + 1])) {
+          const cells = r => r.replace(/^\s*\|/, "").replace(/\|\s*$/, "").split("|").map(c => c.trim());
+          const head = cells(line); i += 2; let rows = [];
+          while (i < lines.length && lines[i].indexOf("|") >= 0 && !/^\s*$/.test(lines[i])) { rows.push(cells(lines[i])); i++; }
+          let t = "<table><thead><tr>" + head.map(c => "<th>" + inline(c) + "</th>").join("") + "</tr></thead><tbody>";
+          for (const r of rows) { t += "<tr>" + r.map(c => "<td>" + inline(c) + "</td>").join("") + "</tr>"; }
+          t += "</tbody></table>"; html += t; continue;
+        }
+        if (/^\s*[-*]\s+/.test(line)) {
+          let items = [];
+          while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) { items.push(lines[i].replace(/^\s*[-*]\s+/, "")); i++; }
+          html += "<ul>" + items.map(it => "<li>" + inline(it) + "</li>").join("") + "</ul>"; continue;
+        }
+        if (/^\s*\d+\.\s+/.test(line)) {
+          let items = [];
+          while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) { items.push(lines[i].replace(/^\s*\d+\.\s+/, "")); i++; }
+          html += "<ol>" + items.map(it => "<li>" + inline(it) + "</li>").join("") + "</ol>"; continue;
+        }
+        if (/^\s*>\s?/.test(line)) {
+          let quote = [];
+          while (i < lines.length && /^\s*>\s?/.test(lines[i])) { quote.push(lines[i].replace(/^\s*>\s?/, "")); i++; }
+          html += "<blockquote>" + inline(quote.join(" ")) + "</blockquote>"; continue;
+        }
+        let para = [line]; i++;
+        while (i < lines.length && !/^\s*$/.test(lines[i])
+          && !/^\s*(#{1,4}\s|[-*]\s|\d+\.\s|>|```|---+\s*$)/.test(lines[i])
+          && lines[i].indexOf("|") < 0) {
+          para.push(lines[i]); i++;
+        }
+        html += "<p>" + inline(para.join(" ")) + "</p>";
+      }
+      return html;
+    }
+
+    /* =========================================================
+       SYNTAX HIGHLIGHTER
+       ========================================================= */
+    const PH_START = "\uE000"; const PH_END = "\uE001";
+    function _restorePlaceholders(s, ph) {
+      const re = new RegExp(PH_START + "(\\d+)" + PH_END, "g");
+      return s.replace(re, (m, i) => ph[+i]);
+    }
+    function highlightJson(text) {
+      const s = esc(text);
+      return s.replace(
+        /("(?:\\u[0-9a-fA-F]{4}|\\.|[^"\\\n])*")(\s*:)?|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)|\b(true|false|null)\b/g,
+        (m, str, colon, num, bool) => {
+          if (str !== undefined) {
+            if (colon) return `<span class="tok-key">${str}</span><span class="tok-punct">${colon}</span>`;
+            return `<span class="tok-str">${str}</span>`;
+          }
+          if (num !== undefined) return `<span class="tok-num">${num}</span>`;
+          if (bool !== undefined) return `<span class="tok-bool">${bool}</span>`;
+          return m;
+        }
+      );
+    }
+    function highlightGeneric(text, keywords) {
+      let s = esc(text); const ph = [];
+      const push = html => { ph.push(html); return PH_START + (ph.length - 1) + PH_END; };
+      s = s.replace(/\/\*[\s\S]*?\*\//g, m => push(`<span class="tok-comment">${m}</span>`));
+      s = s.replace(/(^|[^\w:])((?:#|\/\/)[^\n]*)/g, (m, pre, c) => pre + push(`<span class="tok-comment">${c}</span>`));
+      s = s.replace(/"(?:[^"\\\n]|\\.)*"/g, m => push(`<span class="tok-str">${m}</span>`));
+      s = s.replace(/'(?:[^'\\\n]|\\.)*'/g, m => push(`<span class="tok-str">${m}</span>`));
+      s = s.replace(/`(?:[^`\\]|\\.)*`/g, m => push(`<span class="tok-str">${m}</span>`));
+      s = s.replace(/\b(true|false|null|True|False|None)\b/g, '<span class="tok-bool">$1</span>');
+      s = s.replace(/\b(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\b/g, '<span class="tok-num">$1</span>');
+      if (keywords && keywords.length) {
+        const re = new RegExp("\\b(" + keywords.join("|") + ")\\b", "g");
+        s = s.replace(re, '<span class="tok-kw">$1</span>');
+      }
+      return _restorePlaceholders(s, ph);
+    }
+    function highlightYaml(text) {
+      return esc(text).split("\n").map(line => {
+        const cm = line.match(/^(\s*)(#.*)$/);
+        if (cm) return cm[1] + `<span class="tok-comment">${cm[2]}</span>`;
+        const li = line.match(/^(\s*)(-\s+)(.*)$/);
+        if (li) {
+          const [, indent, dash, rest] = li;
+          return indent + `<span class="tok-punct">${dash}</span>` + _yamlValue(rest);
+        }
+        const kv = line.match(/^(\s*)([^\s:#][^:]*?)(\s*:\s*)(.*)$/);
+        if (kv) {
+          const [, indent, key, sep, val] = kv;
+          return indent + `<span class="tok-key">${key}</span>` + `<span class="tok-punct">${sep}</span>` + _yamlValue(val);
+        }
+        const kOnly = line.match(/^(\s*)([^\s:#][^:]*?)(:)(\s*)$/);
+        if (kOnly) {
+          const [, indent, key, colon, tail] = kOnly;
+          return indent + `<span class="tok-key">${key}</span><span class="tok-punct">${colon}</span>` + tail;
+        }
+        return line;
+      }).join("\n");
+    }
+    function _yamlValue(v) {
+      if (!v) return v;
+      const t = v.trim();
+      if (t === "") return v;
+      if (/^(true|false|null|~|yes|no|on|off)$/i.test(t)) return `<span class="tok-bool">${v}</span>`;
+      if (/^-?\d+(\.\d+)?$/.test(t)) return `<span class="tok-num">${v}</span>`;
+      if (/^[\[{]/.test(t)) return `<span class="tok-num">${v}</span>`;
+      if (/^['"].*['"]$/.test(t)) return `<span class="tok-str">${v}</span>`;
+      return `<span class="tok-plain">${v}</span>`;
+    }
+    function highlightTerraform(text) {
+      return highlightGeneric(text, [
+        "resource", "data", "variable", "output", "module", "provider",
+        "terraform", "locals", "backend", "dynamic", "for_each", "count",
+        "depends_on", "lifecycle", "provisioner", "required_providers",
+        "required_version", "source", "default", "type", "description",
+        "for", "in", "if"
+      ]);
+    }
+    function highlightPython(text) {
+      let s = esc(text); const ph = [];
+      const push = html => { ph.push(html); return PH_START + (ph.length - 1) + PH_END; };
+      s = s.replace(/("""[\s\S]*?"""|'''[\s\S]*?''')/g, m => push(`<span class="tok-str">${m}</span>`));
+      s = s.replace(/([fFrRbBuU]{0,2})("(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*')/g,
+        (m, prefix, str) => {
+          const preHtml = prefix ? `<span class="tok-kw">${prefix}</span>` : "";
+          return preHtml + push(`<span class="tok-str">${str}</span>`);
+        });
+      s = s.replace(/(^|[^\w"'#])(#[^\n]*)/g, (m, pre, c) => pre + push(`<span class="tok-comment">${c}</span>`));
+      s = s.replace(/(^|\n)([ \t]*)(@[A-Za-z_][\w.]*)/g, (m, nl, ind, dec) =>
+        nl + ind + push(`<span class="tok-kw">${dec}</span>`));
+      const kw = [
+        "def", "class", "if", "elif", "else", "for", "while", "return", "yield",
+        "import", "from", "as", "try", "except", "finally", "raise", "with",
+        "lambda", "pass", "break", "continue", "global", "nonlocal", "assert",
+        "del", "in", "is", "not", "and", "or", "async", "await", "match", "case"
+      ];
+      s = s.replace(new RegExp("\\b(" + kw.join("|") + ")\\b", "g"), '<span class="tok-kw">$1</span>');
+      s = s.replace(/\b(True|False|None)\b/g, '<span class="tok-bool">$1</span>');
+      const builtins = [
+        "print", "len", "range", "str", "int", "float", "list", "dict", "set", "tuple",
+        "bool", "type", "isinstance", "issubclass", "open", "enumerate", "zip", "map",
+        "filter", "sum", "min", "max", "abs", "sorted", "reversed", "any", "all",
+        "input", "repr", "format", "vars", "dir", "id", "hash", "iter", "next",
+        "getattr", "setattr", "hasattr", "super", "callable"
+      ];
+      s = s.replace(new RegExp("\\b(" + builtins.join("|") + ")(?=\\s*\\()", "g"), '<span class="tok-fn">$1</span>');
+      s = s.replace(/\b(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\b/g, '<span class="tok-num">$1</span>');
+      return _restorePlaceholders(s, ph);
+    }
+    function highlightCode(text, lang) {
+      if (!text) return "";
+      switch (lang) {
+        case "json": return highlightJson(text);
+        case "yaml": return highlightYaml(text);
+        case "hcl": return highlightTerraform(text);
+        case "python": return highlightPython(text);
+        case "plain": return esc(text);
+        default: return highlightGeneric(text);
+      }
+    }
+    function detectLang(text) {
+      if (!text) return "plain";
+      const t = String(text).trim();
+      if (!t) return "plain";
+      if ((t.startsWith("{") && t.endsWith("}")) || (t.startsWith("[") && t.endsWith("]"))) {
+        try { JSON.parse(t); return "json"; } catch (e) { }
+      }
+      if (/^\s*(resource|data|variable|output|module|provider|terraform|locals)\s+["a-zA-Z_]/m.test(t)
+        || /^\s*terraform\s*{/m.test(t)) return "hcl";
+      if (/^\s*(def|class|async\s+def)\s+[A-Za-z_]/m.test(t)
+        || /^\s*(import|from)\s+[A-Za-z_]/m.test(t)
+        || /^\s*@[A-Za-z_]\w*/m.test(t)
+        || /if\s+__name__\s*==\s*['"]__main__['"]/.test(t)
+        || /\breturn\s+/.test(t)
+        || /\bself\b/.test(t)) return "python";
+      const lines = t.split("\n").filter(l => l.trim());
+      if (lines.length >= 2) {
+        const yamlLines = lines.filter(l =>
+          /^\s*[A-Za-z_][\w.-]*\s*:(\s|$)/.test(l) || /^\s*-\s+/.test(l) || /^\s*#/.test(l)
+        ).length;
+        if (yamlLines / lines.length >= 0.5) return "yaml";
+      }
+      return "plain";
+    }
+    function _langLabel(lang) {
+      return { json: "json", yaml: "yaml", hcl: "hcl", python: "python", plain: "text" }[lang] || "code";
+    }
+
+    /* =========================================================
+       SCROLL / MESSAGGI
+       ========================================================= */
+    function atBottom() { return log.scrollHeight - log.scrollTop - log.clientHeight < 80; }
+    function scrollBottom() { log.scrollTop = log.scrollHeight; }
+    function addMsg(cls, text) {
+      const b = atBottom();
+      const d = document.createElement("div");
+      if (cls === "final") {
+        d.className = "msg final md";
+        d.innerHTML = mdToHtml(text);
+      } else {
+        d.className = "msg " + cls;
+        d.textContent = text;
+      }
+      log.appendChild(d);
+      if (b) scrollBottom();
+    }
+
+    /* =========================================================
+       NOMI TOOL
+       ========================================================= */
+    const DOMAIN_IT = {
+      adf: "Data Factory", blob: "Storage (blob)", sql: "SQL", table: "Storage (table)",
+      queue: "Storage (queue)", fileshare: "File share", resource: "Resource group/risorse",
+      network: "Rete", keyvault: "Key Vault", rbac: "Permessi (RBAC)", lock: "Lock di governance",
+      iac: "Terraform (IaC)", cicd: "Pipeline CI/CD", github: "GitHub", docs: "Documentazione",
+      naming: "Naming", feasibility: "Fattibilità", remediation: "Remediation",
+      meta: "Auto-estensione", files: "File allegati", airflow: "Airflow"
+    };
+    const VERB_IT = {
+      list: "elenco", get: "lettura", create: "creazione", delete: "eliminazione",
+      update: "aggiornamento", set: "impostazione", run: "esecuzione", trigger: "avvio",
+      wait: "attesa", plan: "piano", apply: "applicazione", destroy: "distruzione", import: "import",
+      write: "scrittura", read: "lettura", commit: "commit", merge: "merge", move: "spostamento",
+      sync: "sincronizzazione", build: "generazione", scaffold: "generazione", check: "verifica",
+      add: "aggiunta", remove: "rimozione", analyze: "analisi", propose: "proposta", classify: "classificazione",
+      execute: "esecuzione", configure: "configurazione", generate: "generazione", render: "generazione",
+      install: "installazione"
+    };
+    function friendlyTool(action) {
+      const [dom, ...rest] = String(action || "").split(".");
+      const verb = (rest.join("_") || "").split("_")[0];
+      const d = DOMAIN_IT[dom] || dom;
+      const v = VERB_IT[verb] || verb || "operazione";
+      return `${v} · ${d}`;
+    }
+
+    /* =========================================================
+       THINK BLOCK
+       ========================================================= */
+    let currentThink = null, currentThinkSteps = null, currentThinkLive = null, currentThinkIcon = null, currentActionStep = null;
+
+    function ensureThinkBlock() {
+      if (currentThink) return;
+      const det = document.createElement("details");
+      det.className = "think-block running";
+      det.open = false;
+      det.innerHTML =
+        '<summary>' +
+        '<span class="think-ic"><span class="spinner"></span></span>' +
+        '<span class="think-live">Ragiono…</span>' +
+        '<span class="think-chev">▾</span>' +
+        '</summary>' +
+        '<div class="think-steps"></div>';
+      log.appendChild(det);
+      currentThink = det;
+      currentThinkSteps = det.querySelector(".think-steps");
+      currentThinkLive = det.querySelector(".think-live");
+      currentThinkIcon = det.querySelector(".think-ic");
+      scrollBottom();
+    }
+    function setThinkLive(text, iconHtml) {
+      if (!currentThink) return;
+      currentThinkLive.textContent = text;
+      if (iconHtml !== undefined) currentThinkIcon.innerHTML = iconHtml;
+    }
+    function appendThoughtStep(text) {
+      const step = document.createElement("div");
+      step.className = "think-step";
+      step.innerHTML = '<span class="si">💭</span><span class="st"></span>';
+      step.querySelector(".st").textContent = text;
+      currentThinkSteps.appendChild(step);
+      currentThinkSteps.scrollTop = currentThinkSteps.scrollHeight;
+      scrollBottom();
+    }
+    function appendActionStep(ev) {
+      const friendly = friendlyTool(ev.action);
+      const det = document.createElement("details");
+      det.className = "action-step running";
+      det.open = false;
+      const argsJson = JSON.stringify(ev.args || {}, null, 2);
+      const argsHtml = highlightJson(argsJson);
+      det.innerHTML =
+        '<summary>' +
+        '<span class="si"><span class="spinner"></span></span>' +
+        '<span class="st"><b>' + esc(friendly) + '</b>' +
+        (ev.write ? '<span class="sb w">scrittura</span>' : '') +
+        '</span>' +
+        '<span class="sc">▾</span>' +
+        '</summary>' +
+        '<div class="step-body">' +
+        '<div class="step-label">Parametri <span class="lang-badge">json</span></div>' +
+        '<pre class="code-block">' + argsHtml + '</pre>' +
+        '<div class="step-result"></div>' +
+        '</div>';
+      currentThinkSteps.appendChild(det);
+      currentActionStep = det;
+      currentThinkSteps.scrollTop = currentThinkSteps.scrollHeight;
+      scrollBottom();
+    }
+    function completeAction(ev) {
+      if (!currentActionStep) return;
+      const failed = /^(ERRORE|AZIONE RIPETUTA BLOCCATA|COMMIT BLOCCATO)/.test(ev.text || "");
+      currentActionStep.classList.remove("running");
+      currentActionStep.classList.add(failed ? "failed" : "done");
+      const ic = currentActionStep.querySelector(".si");
+      if (ic) ic.textContent = failed ? "✕" : "✓";
+      const res = currentActionStep.querySelector(".step-result");
+      if (res) {
+        const text = ev.text || "";
+        const lang = detectLang(text);
+        res.innerHTML =
+          '<div class="step-label">' +
+          (failed ? "Errore" : "Risultato") +
+          ' <span class="lang-badge">' + esc(_langLabel(lang)) + '</span>' +
+          '</div>' +
+          '<pre class="code-block">' + highlightCode(text, lang) + '</pre>';
+      }
+      currentActionStep = null;
+    }
+    function closeThinkBlock(state) {
+      if (!currentThink) return;
+      currentThink.classList.remove("running");
+      if (state === "failed") currentThink.classList.add("failed");
+      else currentThink.classList.add("done");
+      if (state === "failed") {
+        currentThinkIcon.innerHTML = "✕";
+        currentThinkLive.textContent = "Interrotto";
+      } else {
+        const nSteps = currentThinkSteps.children.length;
+        currentThinkIcon.innerHTML = "✓";
+        currentThinkLive.textContent = "Fatto · " + nSteps + " passaggi";
+      }
+      currentThink = null; currentThinkSteps = null;
+      currentThinkLive = null; currentThinkIcon = null;
+      currentActionStep = null;
+    }
+    function setStatus(s) {
+      const wrap = document.getElementById("chatStatusWrap");
+      const txt = document.getElementById("statusText");
+      if (!wrap || !txt) return;
+      const val = (s == null ? "" : String(s)).trim();
+      txt.textContent = val || "idle";
+      if (val && val.toLowerCase() !== "idle") wrap.classList.add("visible");
+      else wrap.classList.remove("visible");
+    }
+
+    /* =========================================================
+       BUSY POLLING FALLBACK
+       Polla /api/history ogni 1.5s quando busy. Serve per:
+       - mostrare i modali di approvazione/secret anche se SSE è
+         bufferizzato da Cloudflare o da un proxy;
+       - riallineare la UI quando il turno finisce e SSE non
+         consegna il "done".
+       ========================================================= */
+    let _busyPollTimer = null;
+
+    function startBusyPolling() {
+      if (_busyPollTimer) return;
+      _busyPollTimer = setInterval(async () => {
+        if (!AppState.busy) { stopBusyPolling(); return; }
+        try {
+          const d = await api("/api/history").then(r => r.ok ? r.json() : null);
+          if (!d) return;
+
+          // Approvazione pendente: mostra il modale se non è già aperto
+          if (d.pending_kind === "approval" && d.pending_payload) {
+            const overlay = $("#approveOverlay");
+            if (overlay && !overlay.classList.contains("show")) {
+              showApproval({
+                type: "approval_request",
+                action: d.pending_payload.action,
+                args: d.pending_payload.args || {},
+                preview: d.pending_payload.preview || "",
+              });
+            }
+          } else if (d.pending_kind === "secret" && d.pending_payload) {
+            const overlay = $("#secretOverlay");
+            if (overlay && !overlay.classList.contains("show")) {
+              showSecret({ label: d.pending_payload.label || "Segreto richiesto" });
+            }
+          }
+
+          // Turno finito: ricostruisci la history e sblocca la UI
+          if (d.busy === false) {
+            stopBusyPolling();
+            AppState.busy = false;
+            log.innerHTML = "";
+            if (d.messages && d.messages.length) {
+              renderHistoryIntoLog(d.messages);
+              scrollBottom();
+            }
+            setStatus("idle");
+            if (AppState.hasAnyLLMKey) $("#send").disabled = false;
+            const st = $("#stop"); if (st) st.style.display = "none";
+            const ao = $("#approveOverlay"); if (ao) ao.classList.remove("show");
+            const so = $("#secretOverlay"); if (so) so.classList.remove("show");
+          }
+        } catch { /* ignora */ }
+      }, 1500);
+    }
+
+    function stopBusyPolling() {
+      if (_busyPollTimer) {
+        clearInterval(_busyPollTimer);
+        _busyPollTimer = null;
+      }
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && AppState.busy) {
+        startBusyPolling();
+      }
+    });
+
+    /* =========================================================
+       VIEW SWITCHING
+       ========================================================= */
+    let currentView = "chat";
+    const VIEW_LABELS = { chat: "", tools: "Tools", history: "Storico", settings: "Impostazioni" };
+
+    function setView(view) {
+      currentView = view;
+      document.querySelectorAll(".drawer-nav button").forEach(b => {
+        b.classList.toggle("active", b.dataset.view === view);
+      });
+      const chatView = document.getElementById("chatView");
+      const panelView = document.getElementById("panelView");
+      if (view === "chat") {
+        chatView.classList.add("active");
+        panelView.classList.remove("active");
+        $("#viewTitle").textContent = "";
+        requestAnimationFrame(() => { log.scrollTop = log.scrollHeight; });
+        setTimeout(() => { const q = $("#q"); if (q) q.focus(); }, 50);
+      } else {
+        chatView.classList.remove("active");
+        panelView.classList.add("active");
+        $("#viewTitle").textContent = VIEW_LABELS[view] || "";
+        renderSide(view);
+      }
+      closeDrawer();
+    }
+    document.querySelectorAll(".drawer-nav button").forEach(b => {
+      b.onclick = () => setView(b.dataset.view);
+    });
+
+    /* =========================================================
+       DRAWER
+       ========================================================= */
+    function openDrawer() {
+      const d = $("#drawer");
+      d.setAttribute("aria-hidden", "false");
+      d.classList.add("open");
+      $("#drawerOverlay").classList.add("show");
+    }
+    function closeDrawer() {
+      const d = $("#drawer");
+      const mb = $("#menuBtn"); if (mb) mb.focus();
+      d.setAttribute("aria-hidden", "true");
+      d.classList.remove("open");
+      $("#drawerOverlay").classList.remove("show");
+    }
+    $("#menuBtn").onclick = openDrawer;
+    $("#drawerClose").onclick = closeDrawer;
+    $("#drawerOverlay").onclick = closeDrawer;
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
+
+    /* =========================================================
+       HELPER difensivi
+       ========================================================= */
+    function _bind(id, event, fn) {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener(event, fn);
+      else console.warn("[bind] elemento mancante:", id);
+    }
+    function _setModalMsg(id, text, kind) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.className = "set-msg " + (kind || "");
+      el.textContent = text || "";
+    }
+
+    /* =========================================================
+       AUTH
+       ========================================================= */
+    (async () => {
+      await window.hemmyReady;
+      const { data: { session } } = await window.HEMMY_SUPABASE.auth.getSession();
+      if (!session) { location.href = "login.html"; return; }
+
+      const user = session.user;
+      $("#userName").textContent = user.email || "utente";
+      $("#userRole").textContent = "";
+      $("#userAvatar").textContent = (user.email || "?").charAt(0).toUpperCase();
+
+      try {
+        const { data: prof, error } = await window.HEMMY_SUPABASE
+          .from("profiles")
+          .select("username, role")
+          .eq("id", user.id)
+          .single();
+        if (!error && prof) {
+          $("#userName").textContent = prof.username || user.email;
+          $("#userRole").textContent = prof.role || "";
+          $("#userAvatar").textContent = (prof.username || user.email || "?").charAt(0).toUpperCase();
+        }
+      } catch (e) { }
+    })();
+
+    $("#logoutBtn").onclick = async () => {
+      await clearToken();
+      location.href = "login.html";
+    };
+
+    /* =========================================================
+       ME / ONBOARDING
+       ========================================================= */
+    async function refreshMe() {
+      try {
+        const d = await api("/api/me").then(r => r.ok ? r.json() : null);
+        if (d && d.ok) {
+          AppState.me = d;
+          AppState.hasAnyLLMKey = (d.secret_names || []).some(n => n.startsWith("llm_api_key"));
+        }
+      } catch { }
+      updateOnboardingUI();
+    }
+    function updateOnboardingUI() {
+      const banner = $("#onboardingBanner");
+      const lockHint = $("#sendLockedHint");
+      const sendBtn = $("#send");
+      const qInput = $("#q");
+      if (AppState.hasAnyLLMKey) {
+        if (banner) banner.classList.remove("show");
+        if (lockHint) lockHint.classList.remove("show");
+        if (sendBtn) sendBtn.disabled = AppState.busy;
+        if (qInput) { qInput.disabled = false; qInput.placeholder = "Chiedi qualcosa all'agente…"; }
+      } else {
+        if (banner) banner.classList.add("show");
+        if (lockHint) lockHint.classList.add("show");
+        if (sendBtn) sendBtn.disabled = true;
+        if (qInput) { qInput.disabled = true; qInput.placeholder = "Configura prima una API key LLM…"; }
+      }
+    }
+    $("#obGoSettings").onclick = () => setView("settings");
+    $("#obDismiss").onclick = () => {
+      const b = $("#onboardingBanner"); if (b) b.classList.remove("show");
+    };
+    $("#lockGoSettings").onclick = () => setView("settings");
+
+    /* =========================================================
+       CONNESSIONI
+       ========================================================= */
+    let _connectPollTimer = null;
+    async function refreshConnectStatus() {
+      try {
+        const d = await api("/api/connect/status").then(r => r.ok ? r.json() : null);
+        if (!d) return;
+        AppState.connections = d;
+        const stillPending =
+          (d.azure && (d.azure.status === "waiting" || d.azure.status === "connecting")) ||
+          (d.github && d.github.status === "waiting") ||
+          (d.gcp && d.gcp.status === "waiting") ||
+          (d.aws && (d.aws.status === "waiting" || d.aws.status === "select_role"));
+        if (stillPending && !_connectPollTimer) {
+          _connectPollTimer = setInterval(refreshConnectStatus, 2000);
+        } else if (!stillPending && _connectPollTimer) {
+          clearInterval(_connectPollTimer); _connectPollTimer = null;
+        }
+      } catch { }
+    }
+
+    /* =========================================================
+       HISTORY / SSE / TOAST / ALLEGATI / INVIO
+       ========================================================= */
+    function renderHistoryIntoLog(messages) {
+      function openThinkForHistory() { ensureThinkBlock(); }
+      function closeThinkForHistory() { if (currentThink) closeThinkBlock("done"); }
+
+      for (const m of (messages || [])) {
+        const role = m.role, content = (m.content || "");
+        if (role === "user") {
+          closeThinkForHistory();
+          if (content.startsWith("Observation:")) {
+            openThinkForHistory();
+            const step = document.createElement("div");
+            step.className = "think-step";
+            step.innerHTML = '<span class="si">📄</span><span class="st"></span>';
+            step.querySelector(".st").textContent = content.replace(/^Observation:\s*/, "");
+            currentThinkSteps.appendChild(step);
+          } else {
+            addMsg("user", content.replace(/^Domanda:\s*/, ""));
+          }
+        } else if (role === "assistant") {
+          const idx = content.indexOf("Final Answer:");
+          if (idx >= 0) {
+            const pre = content.slice(0, idx).trim();
+            if (pre) {
+              openThinkForHistory();
+              const step = document.createElement("div");
+              step.className = "think-step";
+              step.innerHTML = '<span class="si">💭</span><span class="st"></span>';
+              step.querySelector(".st").textContent = pre;
+              currentThinkSteps.appendChild(step);
+            }
+            closeThinkForHistory();
+            addMsg("final", content.slice(idx + "Final Answer:".length).trim());
+          } else if (content.trim()) {
+            openThinkForHistory();
+            const step = document.createElement("div");
+            step.className = "think-step";
+            step.innerHTML = '<span class="si">💭</span><span class="st"></span>';
+            step.querySelector(".st").textContent = content.trim();
+            currentThinkSteps.appendChild(step);
+          }
+        }
+      }
+      closeThinkForHistory();
+    }
+
+    async function loadHistory() {
+      try {
+        const d = await api("/api/history").then(r => r.json());
+        if (d && d.messages && d.messages.length) {
+          renderHistoryIntoLog(d.messages);
+          const sep = document.createElement("div");
+          sep.style.cssText = "align-self:center;color:var(--muted);font-size:12px;padding:4px 0";
+          // sep.textContent = "— sessione ripristinata (" + d.messages.length + " messaggi) —";
+          log.appendChild(sep);
+          scrollBottom();
+        }
+        if (d && d.pending) showPendingResumeBanner(d.pending);
+        // Se all'avvio c'è già un'approvazione pendente, mostrala subito
+        if (d && d.pending_kind === "approval" && d.pending_payload) {
+          showApproval({
+            type: "approval_request",
+            action: d.pending_payload.action,
+            args: d.pending_payload.args || {},
+            preview: d.pending_payload.preview || "",
+          });
+          AppState.busy = true;
+          $("#send").disabled = true;
+          $("#stop").style.display = "";
+          startBusyPolling();
+        } else if (d && d.pending_kind === "secret" && d.pending_payload) {
+          showSecret({ label: d.pending_payload.label || "Segreto richiesto" });
+          AppState.busy = true;
+          $("#send").disabled = true;
+          $("#stop").style.display = "";
+          startBusyPolling();
+        }
+      } catch (e) { }
+    }
+    function showPendingResumeBanner(pendingText) {
+      const b = document.createElement("div");
+      b.className = "msg final";
+      b.style.cssText = "align-self:center;background:var(--panel2);border:1px solid var(--warn);"
+        + "border-radius:10px;padding:10px 14px;max-width:80%;font-size:13px";
+      b.innerHTML = '⚠️ Una richiesta è rimasta interrotta:'
+        + '<div style="margin:6px 0;padding:8px;background:var(--panel);border-radius:6px;white-space:pre-wrap">'
+        + esc(pendingText) + '</div>'
+        + '<button id="resumePendingBtn" style="padding:5px 10px;border:0;border-radius:6px;background:var(--accent);'
+        + 'color:#fff;cursor:pointer;font-size:12px;margin-right:6px">Riprendi</button>'
+        + '<button id="dismissPendingBtn" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;'
+        + 'background:transparent;color:var(--muted);cursor:pointer;font-size:12px">Ignora</button>';
+      log.appendChild(b);
+      scrollBottom();
+      document.getElementById("resumePendingBtn").onclick = () => {
+        $("#q").value = pendingText; $("#q").focus(); b.remove();
+      };
+      document.getElementById("dismissPendingBtn").onclick = () => b.remove();
+    }
+
+    (async () => {
+      await window.hemmyReady;
+      const es = new EventSource(window.HEMMY_API_BASE + "/api/events?token=" + encodeURIComponent(getToken()));
+      es.onmessage = e => {
+        let ev; try { ev = JSON.parse(e.data); } catch { return; }
+        handle(ev);
+      };
+      es.onerror = () => {
+        window.HEMMY_SUPABASE.auth.getSession().then(({ data }) => {
+          if (!data.session) location.href = "login.html";
+        });
+      };
+    })();
+
+    function handle(ev) {
+      switch (ev.type) {
+        case "hello":
+          AppState.busy = !!ev.busy;
+          if (AppState.busy) {
+            $("#send").disabled = true;
+            $("#stop").style.display = "";
+            startBusyPolling();
+            setStatus("in esecuzione…");
+          } else {
+            $("#send").disabled = !AppState.hasAnyLLMKey;
+            $("#stop").style.display = "none";
+            setStatus("idle");
+          }
+          break;
+        case "user": break;
+        case "thought": {
+          ensureThinkBlock();
+          const t = (ev.text || "").trim();
+          if (t) {
+            appendThoughtStep(t);
+            const head = t.length > 90 ? t.slice(0, 90) + "…" : t;
+            setThinkLive("💭 " + head, '<span class="spinner"></span>');
+          }
+          setStatus("sto ragionando…");
+          break;
+        }
+        case "action": {
+          ensureThinkBlock();
+          appendActionStep(ev);
+          setThinkLive("🔧 Sto usando: " + friendlyTool(ev.action), '<span class="spinner"></span>');
+          setStatus("sto usando: " + friendlyTool(ev.action));
+          break;
+        }
+        case "observation":
+          completeAction(ev);
+          setThinkLive("📄 Elaboro il risultato…", '<span class="spinner"></span>');
+          setStatus("elaboro il risultato…");
+          break;
+        case "final":
+          closeThinkBlock("done");
+          addMsg("final", ev.text);
+          setStatus("idle");
+          break;
+        case "error":
+          closeThinkBlock("failed");
+          addMsg("error", "⚠️ " + ev.text);
+          AppState.busy = false;
+          stopBusyPolling();
+          setStatus("idle");
+          $("#send").disabled = !AppState.hasAnyLLMKey;
+          $("#stop").style.display = "none";
+          break;
+        case "stopping":
+          setStatus("stop richiesto, attendo chiusura…");
+          break;
+        case "stopped":
+          closeThinkBlock("done");
+          addMsg("final", "⏹ " + (ev.text || "Elaborazione interrotta."));
+          AppState.busy = false;
+          stopBusyPolling();
+          setStatus("idle");
+          if (AppState.hasAnyLLMKey) $("#send").disabled = false;
+          $("#stop").style.display = "none";
+          $("#approveOverlay").classList.remove("show");
+          $("#secretOverlay").classList.remove("show");
+          break;
+        case "reset":
+          if (currentThink) closeThinkBlock("done");
+          log.innerHTML = "";
+          addMsg("final", "Contesto azzerato.");
+          AppState.busy = false;
+          stopBusyPolling();
+          if (AppState.hasAnyLLMKey) $("#send").disabled = false;
+          $("#stop").style.display = "none";
+          $("#approveOverlay").classList.remove("show");
+          $("#secretOverlay").classList.remove("show");
+          setStatus("idle");
+          break;
+        case "done":
+          AppState.busy = false;
+          stopBusyPolling();
+          setStatus("idle");
+          if (AppState.hasAnyLLMKey) $("#send").disabled = false;
+          $("#stop").style.display = "none";
+          $("#approveOverlay").classList.remove("show");
+          $("#secretOverlay").classList.remove("show");
+          break;
+        case "approval_request": showApproval(ev); break;
+        case "secret_request": showSecret(ev); break;
+        case "tools_changed": showToolsChangedToast(ev); break;
+      }
+    }
+
+    function showToolsChangedToast(ev) {
+      let t = document.getElementById("toolsChangedToast");
+      if (!t) { t = document.createElement("div"); t.id = "toolsChangedToast"; document.body.appendChild(t); }
+      const needsUi = !!ev.ui;
+      t.innerHTML = "🧩 " + esc(ev.text || "Catalogo tool aggiornato.")
+        + (needsUi ? '<div><button id="toolsChangedReload">Ricarica pagina</button></div>' : "");
+      t.style.display = "block";
+      if (needsUi) document.getElementById("toolsChangedReload").onclick = () => location.reload();
+      else setTimeout(() => { if (t) t.style.display = "none"; }, 6000);
+      if (currentView === "tools") renderSide("tools");
+    }
+
+    let attachedFiles = [];
+    function renderAttachments() {
+      const box = $("#attachments");
+      if (!attachedFiles.length) { box.innerHTML = ""; box.style.display = "none"; return; }
+      box.style.display = "flex";
+      box.innerHTML = attachedFiles.map((f, i) =>
+        `<span class="chip">📎 ${esc(f.name)} <a href="#" data-i="${i}" class="chip-x">✕</a></span>`
+      ).join("");
+      box.querySelectorAll(".chip-x").forEach(a => {
+        a.onclick = e => { e.preventDefault(); attachedFiles.splice(+a.dataset.i, 1); renderAttachments(); };
+      });
+    }
+    function readFileAsBase64(file) {
+      return new Promise((resolve, reject) => {
+        const fr = new FileReader();
+        fr.onload = () => resolve(String(fr.result).split(",").pop());
+        fr.onerror = reject;
+        fr.readAsDataURL(file);
+      });
+    }
+    async function uploadFile(file) {
+      const b64 = await readFileAsBase64(file);
+      const r = await api("/api/upload", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: file.name, content_b64: b64 })
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.ok) { addMsg("error", "Upload fallito: " + (j.error || r.status)); return; }
+      attachedFiles.push({ name: j.name, path: j.path });
+      renderAttachments();
+    }
+    $("#attach").onclick = () => $("#fileInput").click();
+    $("#fileInput").addEventListener("change", async e => {
+      const files = Array.from(e.target.files || []);
+      for (const f of files) { await uploadFile(f); }
+      e.target.value = "";
+    });
+
+    async function send() {
+      if (!AppState.hasAnyLLMKey) { setView("settings"); return; }
+      if (AppState.busy) return;
+      let q = $("#q").value.trim();
+      if (!q && !attachedFiles.length) return;
+      let question = q;
+      if (attachedFiles.length) {
+        const list = attachedFiles.map(f => `- ${f.name} (path: ${f.path})`).join("\n");
+        question = (q ? q + "\n\n" : "") + "[File allegati disponibili in uploads/]\n" + list;
+        addMsg("user", (q || "(nessun testo)") + "\n\n📎 " + attachedFiles.map(f => f.name).join(", "));
+      } else {
+        addMsg("user", q);
+      }
+      $("#q").value = ""; $("#q").style.height = "auto";
+      attachedFiles = []; renderAttachments();
+
+      AppState.busy = true;
+      setStatus("in esecuzione…");
+      $("#send").disabled = true;
+      $("#stop").style.display = "";
+      $("#stop").disabled = false;
+      $("#stop").textContent = "■";
+      startBusyPolling();
+
+      const r = await api("/api/ask", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question })
+      });
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        addMsg("error", j.error || "errore");
+        AppState.busy = false;
+        $("#send").disabled = false;
+        $("#stop").style.display = "none";
+        setStatus("idle");
+        stopBusyPolling();
+        if (j.code === "llm_not_configured") {
+          addMsg("final", "➡️ Configura la tua API key LLM dalla sezione **Impostazioni** (⚙️) e riprova.");
+          setTimeout(() => setView("settings"), 300);
+        }
+        if (r.status === 409) {
+          AppState.busy = true;
+          $("#send").disabled = true;
+          $("#stop").style.display = "";
+          startBusyPolling();
+        }
+      }
+    }
+    $("#send").onclick = send;
+    $("#q").addEventListener("keydown", e => {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+    });
+    $("#q").addEventListener("input", e => {
+      e.target.style.height = "auto";
+      e.target.style.height = Math.min(e.target.scrollHeight, 140) + "px";
+    });
+
+    async function stopTurn() {
+      if (!AppState.busy) return;
+      const btn = $("#stop");
+      if (btn) { btn.disabled = true; btn.textContent = "…"; }
+      try {
+        const r = await api("/api/stop", { method: "POST" });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.ok) {
+          addMsg("error", "Stop fallito: " + (j.error || r.status));
+          if (btn) { btn.disabled = false; btn.textContent = "■"; }
+          return;
+        }
+        if (!j.stopped) {
+          AppState.busy = false;
+          $("#send").disabled = !AppState.hasAnyLLMKey;
+          if (btn) btn.style.display = "none";
+          setStatus("idle");
+          stopBusyPolling();
+        }
+      } catch (e) {
+        addMsg("error", "Errore di rete: " + e);
+        if (btn) { btn.disabled = false; btn.textContent = "■"; }
+      }
+    }
+    $("#stop").onclick = stopTurn;
+
+    function showApproval(ev) {
+      $("#apAction").textContent = ev.action || "";
+      const argsJson = JSON.stringify(ev.args || {}, null, 2);
+      $("#apArgs").innerHTML = highlightJson(argsJson);
+      $("#apArgsLang").textContent = "json";
+      const previewText = (ev.preview || "").trim();
+      if (previewText) {
+        const lang = detectLang(previewText);
+        $("#apPreview").innerHTML = highlightCode(previewText, lang);
+        $("#apPreviewLang").textContent = _langLabel(lang);
+        $("#apPreviewWrap").style.display = "";
+      } else {
+        $("#apPreviewWrap").style.display = "none";
+      }
+      $("#approveOverlay").classList.add("show");
+      setTimeout(() => { const b = $("#apApprove"); if (b) b.focus(); }, 60);
+    }
+    async function respond(value) {
+      await api("/api/respond", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value })
+      });
+    }
+    $("#apApprove").onclick = () => { $("#approveOverlay").classList.remove("show"); respond(true); };
+    $("#apDeny").onclick = () => { $("#approveOverlay").classList.remove("show"); respond(false); };
+
+    function showSecret(ev) {
+      $("#secLabel").textContent = ev.label || "Segreto richiesto";
+      $("#secInput").value = "";
+      $("#secretOverlay").classList.add("show");
+      setTimeout(() => $("#secInput").focus(), 50);
+    }
+    function sendSecret() {
+      const v = $("#secInput").value;
+      $("#secInput").value = "";
+      $("#secretOverlay").classList.remove("show");
+      respond(v);
+    }
+    $("#secOk").onclick = sendSecret;
+    $("#secCancel").onclick = () => {
+      $("#secInput").value = "";
+      $("#secretOverlay").classList.remove("show");
+      respond("");
+    };
+    $("#secInput").addEventListener("keydown", e => {
+      if (e.key === "Enter") { e.preventDefault(); sendSecret(); }
+    });
+
+    /* =========================================================
+       SIDE PANEL
+       ========================================================= */
+    mermaid.initialize({ startOnLoad: false, theme: "default", securityLevel: "loose" });
+
+    async function renderSide(view) {
+      const side = $("#side");
+      side.innerHTML = '<div class="empty">Carico…</div>';
+      if (view === "settings") {
+        await refreshMe();
+        await refreshConnectStatus();
+        await loadProviderCatalog();
+        return renderSettings(side);
+      }
+      if (view === "tools") {
+        const t = await api("/api/tools").then(r => r.json()).catch(() => null);
+        if (!t) { side.innerHTML = '<div class="empty">Errore nel caricamento.</div>'; return; }
+        return renderTools(side, t);
+      }
+      if (view === "history") {
+        const d = await api("/api/dashboard").then(r => r.json()).catch(() => null);
+        if (!d) { side.innerHTML = '<div class="empty">Errore nel caricamento.</div>'; return; }
+        return renderHistory(side, d);
+      }
+    }
+
+    /* =========================================================
+       PROVIDER LLM
+       ========================================================= */
+    const FALLBACK_PROVIDERS = [
+      { id: "deepseek", name: "DeepSeek" },
+      { id: "openai", name: "OpenAI" },
+      { id: "anthropic", name: "Anthropic Claude" },
+      { id: "google", name: "Google Gemini" },
+      { id: "meta", name: "Meta Llama" },
+      { id: "local", name: "Self-hosted / Local" },
+    ];
+    async function loadProviderCatalog() {
+      if (AppState.llmProvidersCatalog) return AppState.llmProvidersCatalog;
+      try {
+        const d = await api("/api/llm/providers").then(r => r.json());
+        if (d && d.ok && d.providers && d.providers.length) {
+          AppState.llmProvidersCatalog = d.providers.map(p => ({
+            id: (p.id || p.name || "").toLowerCase().replace(/\s+/g, "_"),
+            name: p.name || p.id || String(p),
+          }));
+          return AppState.llmProvidersCatalog;
+        }
+      } catch { }
+      AppState.llmProvidersCatalog = FALLBACK_PROVIDERS.slice();
+      return AppState.llmProvidersCatalog;
+    }
+    function slugify(s) {
+      return String(s || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+    }
+    function getLLMProvidersConfig() {
+      const s = (AppState.me && AppState.me.settings) || {};
+      const list = Array.isArray(s.llm_providers) ? s.llm_providers : [];
+      return list.map(p => ({
+        provider: p.provider || "", model: p.model || "",
+        base_url: p.base_url || "", is_primary: !!p.is_primary,
+      }));
+    }
+    function getLLMSecretNames() { return (AppState.me && AppState.me.secret_names) || []; }
+
+    function renderLLMSection(side) {
+      const providers = getLLMProvidersConfig();
+      const names = getLLMSecretNames();
+      let inner = "";
+      if (!providers.length) {
+        inner = '<div class="set-empty">Nessun provider LLM configurato.<br>'
+          + 'Aggiungi almeno una chiave per iniziare a usare Hemmy.</div>';
+      } else {
+        inner = '<div class="llm-list">';
+        for (const p of providers) {
+          const slug = slugify(p.provider);
+          const hasKey = names.includes("llm_api_key__" + slug) || (p.is_primary && names.includes("llm_api_key"));
+          const badge = p.is_primary
+            ? '<span class="badge-primary">primario</span>'
+            : '<span class="badge-fallback">fallback</span>';
+          const metaParts = [];
+          if (p.model) metaParts.push('modello <code>' + esc(p.model) + '</code>');
+          if (p.base_url) metaParts.push('base <code>' + esc(p.base_url) + '</code>');
+          metaParts.push(hasKey ? '<span style="color:var(--ok)">✓ chiave salvata</span>' : '<span style="color:var(--err)">✗ chiave mancante</span>');
+          inner += '<div class="llm-card' + (p.is_primary ? ' is-primary' : '') + '">'
+            + '<div class="llm-card-hd"><span class="cn">' + esc(p.provider) + '</span>' + badge + '</div>'
+            + '<div class="meta">' + metaParts.join(' · ') + '</div>'
+            + '<div class="card-actions">'
+            + (p.is_primary ? '' : '<button data-act="primary" data-provider="' + esc(p.provider) + '">Imposta come primario</button>')
+            + '<button data-act="edit" data-provider="' + esc(p.provider) + '">Modifica</button>'
+            + '<button data-act="delete" data-provider="' + esc(p.provider) + '">Rimuovi</button>'
+            + '</div></div>';
+        }
+        inner += '</div>';
+      }
+      inner += '<div class="set-actions" style="margin-top:14px">'
+        + '<button class="primary" id="llmAddBtn">+ Aggiungi provider LLM</button></div>';
+      return inner;
+    }
+
+    async function openLLMModal({ editProvider } = {}) {
+      const catalog = await loadProviderCatalog();
+      const overlay = $("#llmModalOverlay");
+      const select = $("#llmProvider");
+      const isEdit = !!editProvider;
+      $("#llmModalTitle").textContent = isEdit ? "Modifica provider LLM" : "Aggiungi provider LLM";
+      $("#llmModalMsg").textContent = ""; $("#llmModalMsg").className = "set-msg";
+      select.innerHTML = catalog.map(p => {
+        const id = p.id || slugify(p.name);
+        const sel = isEdit && editProvider.provider === p.name ? " selected" : "";
+        return '<option value="' + esc(id) + '" data-name="' + esc(p.name) + '"' + sel + '>' + esc(p.name) + '</option>';
+      }).join("");
+      if (isEdit) {
+        const slug = slugify(editProvider.provider);
+        let found = false;
+        for (const opt of select.options) {
+          if (opt.dataset.name === editProvider.provider || opt.value === slug) {
+            select.value = opt.value; found = true; break;
+          }
+        }
+        if (!found) {
+          const o = document.createElement("option");
+          o.value = slug; o.dataset.name = editProvider.provider;
+          o.textContent = editProvider.provider; select.appendChild(o); select.value = slug;
+        }
+        $("#llmModel").value = editProvider.model || "";
+        $("#llmBaseUrl").value = editProvider.base_url || "";
+        $("#llmApiKey").value = "";
+        $("#llmApiKey").placeholder = "lascia vuoto per non cambiarla";
+        select.disabled = true;
+      } else {
+        $("#llmModel").value = ""; $("#llmBaseUrl").value = "";
+        $("#llmApiKey").value = ""; $("#llmApiKey").placeholder = "incolla qui la tua API key";
+        select.disabled = false;
+      }
+      overlay.classList.add("show");
+      setTimeout(() => { ($("#llmApiKey") || {}).focus?.(); }, 60);
+    }
+    function closeLLMModal() { $("#llmModalOverlay").classList.remove("show"); }
+    $("#llmModalCancel").onclick = closeLLMModal;
+    $("#llmModalOverlay").onclick = (e) => { if (e.target === $("#llmModalOverlay")) closeLLMModal(); };
+
+    $("#llmModalSave").onclick = async () => {
+      const msg = $("#llmModalMsg");
+      msg.className = "set-msg"; msg.textContent = "";
+      const select = $("#llmProvider");
+      const selectedOpt = select.options[select.selectedIndex];
+      const providerName = selectedOpt ? (selectedOpt.dataset.name || selectedOpt.textContent) : "";
+      const model = $("#llmModel").value.trim();
+      const baseUrl = $("#llmBaseUrl").value.trim();
+      const apiKey = $("#llmApiKey").value;
+      if (!providerName) { msg.className = "set-msg err"; msg.textContent = "Provider richiesto."; return; }
+
+      const currentProviders = getLLMProvidersConfig();
+      const slug = slugify(providerName);
+      const existingIdx = currentProviders.findIndex(p => slugify(p.provider) === slug);
+      const isNew = existingIdx === -1;
+
+      if (isNew && !apiKey) {
+        msg.className = "set-msg err";
+        msg.textContent = "Devi incollare una API key per aggiungere un nuovo provider.";
+        return;
+      }
+
+      if (apiKey) {
+        const secretName = "llm_api_key__" + slug;
+        try {
+          const r = await api("/api/settings/secret", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: secretName, value: apiKey })
+          });
+          if (!r.ok) {
+            const j = await r.json().catch(() => ({}));
+            msg.className = "set-msg err";
+            msg.textContent = j.error || "Errore nel salvataggio della chiave.";
+            return;
+          }
+          if (currentProviders.length === 0) {
+            await api("/api/settings/secret", {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name: "llm_api_key", value: apiKey })
+            });
+          }
+        } catch (e) {
+          msg.className = "set-msg err"; msg.textContent = "Errore di rete: " + e;
+          return;
+        }
+      }
+
+      let updated;
+      if (isNew) {
+        const isFirst = currentProviders.length === 0;
+        updated = currentProviders.concat([{
+          provider: providerName, model, base_url: baseUrl, is_primary: isFirst,
+        }]);
+      } else {
+        updated = currentProviders.map(p => {
+          if (slugify(p.provider) !== slug) return p;
+          return { ...p, model, base_url: baseUrl };
+        });
+      }
+      const settingsUpdate = { llm_providers: updated };
+      const primary = updated.find(p => p.is_primary);
+      if (primary) {
+        settingsUpdate.llm_provider = primary.provider;
+        settingsUpdate.llm_model = primary.model || "";
+        settingsUpdate.llm_base_url = primary.base_url || "";
+      }
+      try {
+        const r = await api("/api/settings", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ settings: settingsUpdate })
+        });
+        if (!r.ok) {
+          const j = await r.json().catch(() => ({}));
+          msg.className = "set-msg err";
+          msg.textContent = j.error || "Errore nel salvataggio delle impostazioni.";
+          return;
+        }
+      } catch (e) {
+        msg.className = "set-msg err"; msg.textContent = "Errore di rete: " + e;
+        return;
+      }
+      if (primary && slugify(primary.provider) === slug && apiKey) {
+        await api("/api/settings/secret", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: "llm_api_key", value: apiKey })
+        });
+      }
+      closeLLMModal();
+      await refreshMe();
+      renderSide("settings");
+    };
+
+    async function llmSetPrimary(providerName) {
+      const providers = getLLMProvidersConfig();
+      const slug = slugify(providerName);
+      const updated = providers.map(p => ({ ...p, is_primary: slugify(p.provider) === slug }));
+      const primary = updated.find(p => p.is_primary);
+      const settingsUpdate = { llm_providers: updated };
+      if (primary) {
+        settingsUpdate.llm_provider = primary.provider;
+        settingsUpdate.llm_model = primary.model || "";
+        settingsUpdate.llm_base_url = primary.base_url || "";
+      }
+      await api("/api/settings", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ settings: settingsUpdate })
+      });
+      await refreshMe();
+      renderSide("settings");
+    }
+
+    async function llmDelete(providerName) {
+      const providers = getLLMProvidersConfig();
+      const slug = slugify(providerName);
+      const wasPrimary = providers.some(p => slugify(p.provider) === slug && p.is_primary);
+      let updated = providers.filter(p => slugify(p.provider) !== slug);
+      if (wasPrimary && updated.length) {
+        updated = updated.map((p, i) => ({ ...p, is_primary: i === 0 }));
+      }
+      try {
+        await api("/api/settings/secret", {
+          method: "DELETE", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: "llm_api_key__" + slug })
+        });
+      } catch { }
+      if (!updated.length) {
+        try {
+          await api("/api/settings/secret", {
+            method: "DELETE", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: "llm_api_key" })
+          });
+        } catch { }
+      }
+      const settingsUpdate = { llm_providers: updated };
+      const primary = updated.find(p => p.is_primary);
+      if (primary) {
+        settingsUpdate.llm_provider = primary.provider;
+        settingsUpdate.llm_model = primary.model || "";
+        settingsUpdate.llm_base_url = primary.base_url || "";
+      } else {
+        settingsUpdate.llm_provider = "";
+        settingsUpdate.llm_model = "";
+        settingsUpdate.llm_base_url = "";
+      }
+      await api("/api/settings", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ settings: settingsUpdate })
+      });
+      await refreshMe();
+      renderSide("settings");
+    }
+
+    /* =========================================================
+       CLOUD / DEVOPS / ORCHESTRATORI — RENDER
+       ========================================================= */
+
+    function _clearDeviceFlow(blockEl) {
+      if (!blockEl) return;
+      blockEl.querySelectorAll(".device-code, .device-flow-note").forEach(n => n.remove());
+    }
+
+    function renderAzureStatus(st) {
+      const msg = $("#azureMsg");
+      const stDot = $("#azureSt");
+      const act = $("#azureActions");
+      if (!msg || !stDot || !act) return;
+      const azureBlock = document.getElementById("connAzure");
+      _clearDeviceFlow(azureBlock);
+      act.innerHTML = ""; stDot.className = "st";
+      st = st || { status: "disconnected" };
+
+      if (st.status === "disconnected") {
+        msg.textContent = "Non connesso.";
+        const b = document.createElement("button");
+        b.className = "primary"; b.textContent = "Connetti Azure";
+        b.onclick = () => handleConnAction("azure-connect");
+        act.appendChild(b);
+        return;
+      }
+      if (st.status === "waiting" || st.status === "connecting") {
+        msg.innerHTML = "Apri <a href=\"" +
+          esc(st.verification_uri || "https://microsoft.com/devicelogin") +
+          "\" target=\"_blank\" rel=\"noopener\">" +
+          esc(st.verification_uri || "microsoft.com/devicelogin") +
+          "</a> e inserisci questo codice:";
+        if (st.user_code) {
+          const codeEl = document.createElement("div");
+          codeEl.className = "device-code";
+          codeEl.textContent = st.user_code;
+          act.appendChild(codeEl);
+        }
+        stDot.classList.add("wait");
+        return;
+      }
+      if (st.status === "connected") {
+        msg.textContent = "Connesso come " + (st.message || "utente") + " ✓";
+        stDot.classList.add("on");
+        const b = document.createElement("button");
+        b.textContent = "Disconnetti";
+        b.onclick = () => handleConnAction("azure-disconnect");
+        act.appendChild(b);
+        return;
+      }
+      if (st.status === "error") {
+        msg.textContent = "Errore: " + (st.message || "connessione non riuscita.");
+        const b = document.createElement("button");
+        b.className = "primary"; b.textContent = "Riprova";
+        b.onclick = () => handleConnAction("azure-connect");
+        act.appendChild(b);
+        return;
+      }
+      msg.textContent = "Stato: " + st.status;
+    }
+
+    function renderGithubStatus(st, configured) {
+      const msg = $("#githubMsg");
+      const stDot = $("#githubSt");
+      const act = $("#githubActions");
+      if (!msg || !stDot || !act) return;
+      const githubBlock = document.getElementById("connGithub");
+      _clearDeviceFlow(githubBlock);
+      act.innerHTML = ""; stDot.className = "st";
+      st = st || { status: "disconnected" };
+
+      if (configured === false && (!st.status || st.status === "disconnected")) {
+        msg.innerHTML = "Configura la tua <strong>OAuth App GitHub</strong> (BYOK): "
+          + "crea l'app su GitHub, abilita Device Flow, incolla il Client ID. "
+          + "Resta salvato solo sul tuo profilo Hemmy.";
+        const b = document.createElement("button");
+        b.className = "primary";
+        b.textContent = "Configura OAuth App";
+        b.onclick = () => openGithubModal();
+        act.appendChild(b);
+        return;
+      }
+
+      if (st.status === "disconnected") {
+        msg.textContent = "Configurato. Non ancora connesso a GitHub.";
+        const b = document.createElement("button");
+        b.className = "primary"; b.textContent = "Connetti GitHub";
+        b.onclick = () => handleConnAction("github-connect");
+        act.appendChild(b);
+        const bEdit = document.createElement("button");
+        bEdit.textContent = "Modifica Client ID";
+        bEdit.onclick = () => openGithubModal();
+        act.appendChild(bEdit);
+        return;
+      }
+      if (st.status === "waiting") {
+        msg.innerHTML = "Apri <a href=\"" +
+          esc(st.verification_uri || "https://github.com/login/device") +
+          "\" target=\"_blank\" rel=\"noopener\">" +
+          esc(st.verification_uri || "github.com/login/device") +
+          "</a> e inserisci questo codice:";
+        if (st.user_code) {
+          const codeEl = document.createElement("div");
+          codeEl.className = "device-code";
+          codeEl.textContent = st.user_code;
+          act.appendChild(codeEl);
+        }
+        stDot.classList.add("wait");
+        return;
+      }
+      if (st.status === "connected") {
+        msg.textContent = "Connesso come " + (st.login || "utente") + " ✓";
+        stDot.classList.add("on");
+        const b = document.createElement("button");
+        b.textContent = "Disconnetti";
+        b.onclick = () => handleConnAction("github-disconnect");
+        act.appendChild(b);
+        return;
+      }
+      if (st.status === "error") {
+        msg.textContent = "Errore: " + (st.message || "connessione non riuscita.");
+        const b = document.createElement("button");
+        b.className = "primary"; b.textContent = "Riprova";
+        b.onclick = () => handleConnAction("github-connect");
+        act.appendChild(b);
+        return;
+      }
+      msg.textContent = "Stato: " + st.status;
+    }
+
+    function renderGcpStatus(st, configured) {
+      const msg = $("#gcpMsg");
+      const stDot = $("#gcpSt");
+      const act = $("#gcpActions");
+      if (!msg || !stDot || !act) return;
+      const gcpBlock = document.getElementById("connGcp");
+      _clearDeviceFlow(gcpBlock);
+      act.innerHTML = ""; stDot.className = "st";
+      st = st || { status: "disconnected" };
+
+      if (configured === false && (!st.status || st.status === "disconnected")) {
+        msg.innerHTML = "Non configurato lato server: servono "
+          + "<code>GOOGLE_OAUTH_CLIENT_ID</code> e <code>GOOGLE_OAUTH_CLIENT_SECRET</code> "
+          + "(client OAuth di tipo <em>TV and Limited-Input Device</em>).";
+        return;
+      }
+      if (st.status === "disconnected") {
+        msg.textContent = "Non connesso.";
+        const b = document.createElement("button");
+        b.className = "primary"; b.textContent = "Connetti GCP";
+        b.onclick = () => handleConnAction("gcp-connect");
+        act.appendChild(b);
+        return;
+      }
+      if (st.status === "waiting") {
+        msg.innerHTML = "Apri <a href=\"" +
+          esc(st.verification_uri || "https://www.google.com/device") +
+          "\" target=\"_blank\" rel=\"noopener\">" +
+          esc(st.verification_uri || "google.com/device") +
+          "</a> e inserisci questo codice:";
+        if (st.user_code) {
+          const codeEl = document.createElement("div");
+          codeEl.className = "device-code";
+          codeEl.textContent = st.user_code;
+          act.appendChild(codeEl);
+        }
+        stDot.classList.add("wait");
+        return;
+      }
+      if (st.status === "connected") {
+        msg.textContent = "Connesso come " + (st.message || "utente") + " ✓";
+        stDot.classList.add("on");
+        const b = document.createElement("button");
+        b.textContent = "Disconnetti";
+        b.onclick = () => handleConnAction("gcp-disconnect");
+        act.appendChild(b);
+        return;
+      }
+      if (st.status === "error") {
+        msg.textContent = "Errore: " + (st.message || "connessione non riuscita.");
+        const b = document.createElement("button");
+        b.className = "primary"; b.textContent = "Riprova";
+        b.onclick = () => handleConnAction("gcp-connect");
+        act.appendChild(b);
+        return;
+      }
+      msg.textContent = "Stato: " + st.status;
+    }
+
+    function renderAwsStatus(st) {
+      const msg = $("#awsMsg");
+      const stDot = $("#awsSt");
+      const act = $("#awsActions");
+      if (!msg || !stDot || !act) return;
+      const awsBlock = document.getElementById("connAws");
+      _clearDeviceFlow(awsBlock);
+      act.innerHTML = ""; stDot.className = "st";
+      st = st || { connected: false, status: "disconnected" };
+
+      if (st.status === "waiting") {
+        msg.innerHTML = "Apri <a href=\"" +
+          esc(st.verification_uri || "#") +
+          "\" target=\"_blank\" rel=\"noopener\">" +
+          esc(st.verification_uri || "verification URL") +
+          "</a> e inserisci questo codice:";
+        if (st.user_code) {
+          const codeEl = document.createElement("div");
+          codeEl.className = "device-code";
+          codeEl.textContent = st.user_code;
+          act.appendChild(codeEl);
+        }
+        stDot.classList.add("wait");
+        return;
+      }
+      if (st.status === "select_role" && Array.isArray(st.options)) {
+        msg.textContent = "Scegli account e ruolo:";
+        const wrap = document.createElement("div");
+        wrap.style.cssText = "display:flex;flex-direction:column;gap:6px;margin-top:6px;";
+        st.options.forEach(opt => {
+          const b = document.createElement("button");
+          b.textContent = opt.account_name + " · " + opt.role_name;
+          b.onclick = async () => {
+            await api("/api/connect/aws/select", {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ account_id: opt.account_id, role_name: opt.role_name })
+            });
+            await refreshConnectStatus();
+            renderSide("settings");
+          };
+          wrap.appendChild(b);
+        });
+        act.appendChild(wrap);
+        stDot.classList.add("wait");
+        return;
+      }
+      if (st.connected && st.status === "connected") {
+        const label = st.message ? " · " + st.message : "";
+        msg.textContent = "Connesso" + label + " ✓";
+        stDot.classList.add("on");
+        const b = document.createElement("button");
+        b.textContent = "Disconnetti";
+        b.onclick = () => handleConnAction("aws-disconnect");
+        act.appendChild(b);
+        return;
+      }
+      if (st.status === "error") {
+        msg.textContent = "Errore: " + (st.message || "connessione non riuscita.");
+        const bSso = document.createElement("button");
+        bSso.className = "primary"; bSso.textContent = "Riprova SSO";
+        bSso.onclick = () => openAwsSsoModal();
+        act.appendChild(bSso);
+        const bStatic = document.createElement("button");
+        bStatic.textContent = "Usa chiavi statiche";
+        bStatic.onclick = () => openAwsKeysModal();
+        act.appendChild(bStatic);
+        return;
+      }
+      msg.textContent = "Non connesso.";
+      const bSso = document.createElement("button");
+      bSso.className = "primary"; bSso.textContent = "Connetti AWS (SSO)";
+      bSso.onclick = () => openAwsSsoModal();
+      act.appendChild(bSso);
+      const bStatic = document.createElement("button");
+      bStatic.textContent = "Usa chiavi statiche";
+      bStatic.onclick = () => openAwsKeysModal();
+      act.appendChild(bStatic);
+    }
+
+    function renderAzdoStatus(st) {
+      const msg = $("#azdoMsg");
+      const stDot = $("#azdoSt");
+      const act = $("#azdoActions");
+      if (!msg || !stDot || !act) return;
+      act.innerHTML = ""; stDot.className = "st";
+      st = st || { connected: false, status: "disconnected" };
+
+      if (st.connected && st.status === "connected") {
+        msg.textContent = "Connesso · org " + (st.message || st.organization || "") + " ✓";
+        stDot.classList.add("on");
+        const b = document.createElement("button");
+        b.textContent = "Disconnetti";
+        b.onclick = () => handleConnAction("azdo-disconnect");
+        act.appendChild(b);
+        return;
+      }
+      msg.textContent = "Non connesso. Azure DevOps riusa la sessione Azure: connetti prima Azure, poi indica il nome della tua organization.";
+      const b = document.createElement("button");
+      b.className = "primary"; b.textContent = "Configura organization";
+      b.onclick = () => openAzdoModal();
+      act.appendChild(b);
+    }
+
+    function renderAirflowStatus(st) {
+      const msg = $("#airflowMsg");
+      const stDot = $("#airflowSt");
+      const act = $("#airflowActions");
+      if (!msg || !stDot || !act) return;
+      act.innerHTML = ""; stDot.className = "st";
+      st = st || { connected: false, status: "disconnected" };
+
+      if (st.connected && st.status === "connected") {
+        const auth = st.auth_mode ? " · " + st.auth_mode : "";
+        const endpoint = st.endpoint ? " · " + st.endpoint : "";
+        msg.innerHTML = "Connesso: <code>" + esc(st.message || st.base_url || "") + "</code>" + auth + endpoint + " ✓";
+        stDot.classList.add("on");
+        const bEdit = document.createElement("button");
+        bEdit.textContent = "Modifica";
+        bEdit.onclick = () => openAirflowModal();
+        act.appendChild(bEdit);
+        const bDisc = document.createElement("button");
+        bDisc.textContent = "Disconnetti";
+        bDisc.onclick = () => handleConnAction("airflow-disconnect");
+        act.appendChild(bDisc);
+        return;
+      }
+      msg.textContent = "Non connesso. Airflow è l'orchestratore di workflow (DAG, pipeline, task): connettilo per far girare pipeline da Hemmy.";
+      const b = document.createElement("button");
+      b.className = "primary"; b.textContent = "Connetti Airflow";
+      b.onclick = () => openAirflowModal();
+      act.appendChild(b);
+    }
+
+    /* =========================================================
+       HANDLE CONN ACTION
+       ========================================================= */
+    async function handleConnAction(act) {
+      const closeAndRefresh = async () => {
+        await refreshConnectStatus();
+        renderSide("settings");
+      };
+
+      if (act === "azure-connect") {
+        try {
+          const r = await api("/api/connect/azure", { method: "POST" });
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok || !j.ok) {
+            const el = document.getElementById("azureMsg");
+            if (el) el.textContent = "Errore: " + (j.error || r.status);
+            return;
+          }
+        } catch (e) {
+          const el = document.getElementById("azureMsg");
+          if (el) el.textContent = "Errore di rete: " + e;
+          return;
+        }
+        return closeAndRefresh();
+      }
+      if (act === "azure-disconnect") {
+        try { await api("/api/connect/azure/disconnect", { method: "POST" }); } catch { }
+        return closeAndRefresh();
+      }
+      if (act === "github-connect") {
+        try {
+          const r = await api("/api/connect/github", { method: "POST" });
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok || !j.ok) {
+            const el = document.getElementById("githubMsg");
+            if (el) el.textContent = "Errore: " + (j.error || "sconosciuto");
+            return;
+          }
+        } catch (e) {
+          const el = document.getElementById("githubMsg");
+          if (el) el.textContent = "Errore di rete: " + e;
+          return;
+        }
+        return closeAndRefresh();
+      }
+      if (act === "github-disconnect") {
+        try { await api("/api/connect/github/disconnect", { method: "POST" }); } catch { }
+        return closeAndRefresh();
+      }
+      if (act === "gcp-connect") {
+        try {
+          const r = await api("/api/connect/gcp", { method: "POST" });
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok || !j.ok) {
+            const el = document.getElementById("gcpMsg");
+            if (el) el.textContent = "Errore: " + (j.error || "sconosciuto");
+            return;
+          }
+        } catch (e) {
+          const el = document.getElementById("gcpMsg");
+          if (el) el.textContent = "Errore di rete: " + e;
+          return;
+        }
+        return closeAndRefresh();
+      }
+      if (act === "gcp-disconnect") {
+        try { await api("/api/connect/gcp/disconnect", { method: "POST" }); } catch { }
+        return closeAndRefresh();
+      }
+      if (act === "aws-connect") return openAwsSsoModal();
+      if (act === "aws-connect-static") return openAwsKeysModal();
+      if (act === "aws-disconnect") {
+        try { await api("/api/connect/aws/disconnect", { method: "POST" }); } catch { }
+        return closeAndRefresh();
+      }
+      if (act === "azdo-connect") return openAzdoModal();
+      if (act === "azdo-disconnect") {
+        try { await api("/api/connect/azdo/disconnect", { method: "POST" }); } catch { }
+        return closeAndRefresh();
+      }
+      if (act === "airflow-connect") return openAirflowModal();
+      if (act === "airflow-disconnect") {
+        try { await api("/api/connect/airflow/disconnect", { method: "POST" }); } catch { }
+        return closeAndRefresh();
+      }
+    }
+
+    /* =========================================================
+       MODALI
+       ========================================================= */
+
+    function openAwsSsoModal() {
+      const overlay = document.getElementById("awsSsoModalOverlay");
+      if (!overlay) return;
+      _setModalMsg("awsSsoModalMsg", "");
+      const urlEl = document.getElementById("awsSsoStartUrl");
+      const regEl = document.getElementById("awsSsoRegion");
+      if (urlEl) urlEl.value = "";
+      if (regEl) regEl.value = "eu-west-1";
+      overlay.classList.add("show");
+      setTimeout(() => { if (urlEl) urlEl.focus(); }, 60);
+    }
+    function closeAwsSsoModal() {
+      const overlay = document.getElementById("awsSsoModalOverlay");
+      if (overlay) overlay.classList.remove("show");
+    }
+    _bind("awsSsoModalCancel", "click", closeAwsSsoModal);
+    _bind("awsSsoModalOverlay", "click", (e) => {
+      if (e.target === document.getElementById("awsSsoModalOverlay")) closeAwsSsoModal();
+    });
+    _bind("awsSsoModalSave", "click", async () => {
+      const urlEl = document.getElementById("awsSsoStartUrl");
+      const regEl = document.getElementById("awsSsoRegion");
+      const start_url = urlEl ? urlEl.value.trim() : "";
+      const region = regEl ? (regEl.value.trim() || "eu-west-1") : "eu-west-1";
+      if (!start_url) return _setModalMsg("awsSsoModalMsg", "Start URL obbligatorio.", "err");
+      try {
+        const r = await api("/api/connect/aws", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ start_url, region })
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.ok) return _setModalMsg("awsSsoModalMsg", j.error || "errore", "err");
+        closeAwsSsoModal();
+        await refreshConnectStatus();
+        renderSide("settings");
+      } catch (e) {
+        _setModalMsg("awsSsoModalMsg", "Errore di rete: " + e, "err");
+      }
+    });
+
+    function openAwsKeysModal() {
+      const overlay = document.getElementById("awsModalOverlay");
+      if (!overlay) return;
+      _setModalMsg("awsModalMsg", "");
+      const a = document.getElementById("awsAccessKeyId");
+      const s = document.getElementById("awsSecretAccessKey");
+      const t = document.getElementById("awsSessionToken");
+      const r = document.getElementById("awsRegion");
+      if (a) a.value = "";
+      if (s) s.value = "";
+      if (t) t.value = "";
+      if (r) r.value = "eu-west-1";
+      overlay.classList.add("show");
+      setTimeout(() => { if (a) a.focus(); }, 60);
+    }
+    function closeAwsModal() {
+      const overlay = document.getElementById("awsModalOverlay");
+      if (overlay) overlay.classList.remove("show");
+    }
+    _bind("awsModalCancel", "click", closeAwsModal);
+    _bind("awsModalOverlay", "click", (e) => {
+      if (e.target === document.getElementById("awsModalOverlay")) closeAwsModal();
+    });
+    _bind("awsModalSave", "click", async () => {
+      const g = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
+      const body = {
+        access_key_id: g("awsAccessKeyId"),
+        secret_access_key: g("awsSecretAccessKey"),
+        session_token: g("awsSessionToken"),
+        region: g("awsRegion") || "eu-west-1",
+      };
+      if (!body.access_key_id || !body.secret_access_key) {
+        return _setModalMsg("awsModalMsg", "Access Key e Secret Key sono obbligatori.", "err");
+      }
+      try {
+        const r = await api("/api/connect/aws", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.ok) return _setModalMsg("awsModalMsg", j.error || "errore", "err");
+        closeAwsModal();
+        await refreshConnectStatus();
+        renderSide("settings");
+      } catch (e) {
+        _setModalMsg("awsModalMsg", "Errore di rete: " + e, "err");
+      }
+    });
+
+    function openAzdoModal() {
+      const overlay = document.getElementById("azdoModalOverlay");
+      if (!overlay) return;
+      _setModalMsg("azdoModalMsg", "");
+      const o = document.getElementById("azdoOrganization");
+      if (o) o.value = "";
+      overlay.classList.add("show");
+      setTimeout(() => { if (o) o.focus(); }, 60);
+    }
+    function closeAzdoModal() {
+      const overlay = document.getElementById("azdoModalOverlay");
+      if (overlay) overlay.classList.remove("show");
+    }
+    _bind("azdoModalCancel", "click", closeAzdoModal);
+    _bind("azdoModalOverlay", "click", (e) => {
+      if (e.target === document.getElementById("azdoModalOverlay")) closeAzdoModal();
+    });
+    _bind("azdoModalSave", "click", async () => {
+      const o = document.getElementById("azdoOrganization");
+      const organization = o ? o.value.trim() : "";
+      if (!organization) return _setModalMsg("azdoModalMsg", "Organization obbligatoria.", "err");
+      try {
+        const r = await api("/api/connect/azdo", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ organization })
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.ok) return _setModalMsg("azdoModalMsg", j.error || "errore", "err");
+        closeAzdoModal();
+        await refreshConnectStatus();
+        renderSide("settings");
+      } catch (e) {
+        _setModalMsg("azdoModalMsg", "Errore di rete: " + e, "err");
+      }
+    });
+
+    function openGithubModal() {
+      const overlay = document.getElementById("githubModalOverlay");
+      if (!overlay) return;
+      _setModalMsg("githubModalMsg", "");
+      const el = document.getElementById("githubClientId");
+      if (el) el.value = "";
+      overlay.classList.add("show");
+      setTimeout(() => { if (el) el.focus(); }, 60);
+    }
+    function closeGithubModal() {
+      const overlay = document.getElementById("githubModalOverlay");
+      if (overlay) overlay.classList.remove("show");
+    }
+    _bind("githubModalCancel", "click", closeGithubModal);
+    _bind("githubModalOverlay", "click", (e) => {
+      if (e.target === document.getElementById("githubModalOverlay")) closeGithubModal();
+    });
+    _bind("githubModalSave", "click", async () => {
+      const el = document.getElementById("githubClientId");
+      const client_id = el ? el.value.trim() : "";
+      if (!client_id) return _setModalMsg("githubModalMsg", "Client ID obbligatorio.", "err");
+      try {
+        const r = await api("/api/connect/github/client-id", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ client_id })
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.ok) return _setModalMsg("githubModalMsg", j.error || "errore", "err");
+        closeGithubModal();
+        await refreshConnectStatus();
+        renderSide("settings");
+      } catch (e) {
+        _setModalMsg("githubModalMsg", "Errore di rete: " + e, "err");
+      }
+    });
+
+    function _airflowShowAuthFields(mode) {
+      const basicBox = document.getElementById("airflowBasicFields");
+      const tokenBox = document.getElementById("airflowTokenFields");
+      if (basicBox) basicBox.style.display = (mode === "basic") ? "" : "none";
+      if (tokenBox) tokenBox.style.display = (mode === "token") ? "" : "none";
+    }
+
+    function openAirflowModal() {
+      const overlay = document.getElementById("airflowModalOverlay");
+      if (!overlay) return;
+      _setModalMsg("airflowModalMsg", "");
+      const urlEl = document.getElementById("airflowBaseUrl");
+      const authEl = document.getElementById("airflowAuthMode");
+      const userEl = document.getElementById("airflowUsername");
+      const passEl = document.getElementById("airflowPassword");
+      const tokEl = document.getElementById("airflowToken");
+      const sslEl = document.getElementById("airflowVerifySsl");
+
+      const st = (AppState.connections && AppState.connections.airflow) || {};
+      if (urlEl) urlEl.value = st.base_url || "";
+      if (authEl) authEl.value = st.auth_mode || "basic";
+      if (userEl) userEl.value = "";
+      if (passEl) passEl.value = "";
+      if (tokEl) tokEl.value = "";
+      if (sslEl) sslEl.checked = (st.verify_ssl !== false);
+
+      _airflowShowAuthFields(authEl ? authEl.value : "basic");
+      overlay.classList.add("show");
+      setTimeout(() => { if (urlEl) urlEl.focus(); }, 60);
+    }
+    function closeAirflowModal() {
+      const overlay = document.getElementById("airflowModalOverlay");
+      if (overlay) overlay.classList.remove("show");
+    }
+    _bind("airflowModalCancel", "click", closeAirflowModal);
+    _bind("airflowModalOverlay", "click", (e) => {
+      if (e.target === document.getElementById("airflowModalOverlay")) closeAirflowModal();
+    });
+    _bind("airflowAuthMode", "change", (e) => {
+      _airflowShowAuthFields(e.target.value);
+    });
+    _bind("airflowModalSave", "click", async () => {
+      const urlEl = document.getElementById("airflowBaseUrl");
+      const authEl = document.getElementById("airflowAuthMode");
+      const userEl = document.getElementById("airflowUsername");
+      const passEl = document.getElementById("airflowPassword");
+      const tokEl = document.getElementById("airflowToken");
+      const sslEl = document.getElementById("airflowVerifySsl");
+
+      const base_url = urlEl ? urlEl.value.trim() : "";
+      const auth_mode = authEl ? authEl.value : "basic";
+      const username = userEl ? userEl.value.trim() : "";
+      const password = passEl ? passEl.value : "";
+      const token = tokEl ? tokEl.value.trim() : "";
+      const verify_ssl = sslEl ? !!sslEl.checked : true;
+
+      if (!base_url) return _setModalMsg("airflowModalMsg", "Base URL obbligatorio.", "err");
+      if (auth_mode === "basic" && (!username || !password)) {
+        return _setModalMsg("airflowModalMsg", "Per Basic Auth servono username e password.", "err");
+      }
+      if (auth_mode === "token" && !token) {
+        return _setModalMsg("airflowModalMsg", "Per Bearer Token serve un token.", "err");
+      }
+
+      _setModalMsg("airflowModalMsg", "Testo la connessione…", "ok");
+
+      try {
+        const r = await api("/api/connect/airflow", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ base_url, auth_mode, username, password, token, verify_ssl })
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.ok) {
+          return _setModalMsg("airflowModalMsg", j.error || "connessione fallita", "err");
+        }
+        _setModalMsg("airflowModalMsg", "✓ Connesso. Airflow salvato.", "ok");
+        setTimeout(() => {
+          closeAirflowModal();
+          refreshConnectStatus().then(() => renderSide("settings"));
+        }, 600);
+      } catch (e) {
+        _setModalMsg("airflowModalMsg", "Errore di rete: " + e, "err");
+      }
+    });
+
+    /* =========================================================
+       RENDER SETTINGS
+       ========================================================= */
+    async function renderSettings(side) {
+      side.innerHTML = '<div class="empty">Carico impostazioni…</div>';
+      await refreshMe();
+      await refreshConnectStatus();
+
+      side.innerHTML = ''
+        + '<div class="set-section">'
+        + '<div class="set-section-hd">'
+        + '<div class="ic">🧠</div>'
+        + '<div class="ttl"><h4>Modello LLM</h4>'
+        + '<p>Porta le tue chiavi. La primaria è quella che Hemmy usa; le altre subentrano in caso di errore.</p>'
+        + '</div>'
+        + '</div>'
+        + '<div id="llmSectionBody"></div>'
+        + '</div>'
+
+        + '<div class="set-section">'
+        + '<div class="set-section-hd">'
+        + '<div class="ic">☁️</div>'
+        + '<div class="ttl"><h4>Cloud providers</h4>'
+        + '<p>Connetti i tuoi account cloud. L\'agente eredita esattamente i tuoi permessi, mai quelli di un service principal condiviso.</p>'
+        + '</div>'
+        + '</div>'
+        + '<div class="conn-block" id="connAzure">'
+        + '<div class="conn-hd"><div class="ci">☁️</div><div class="cn">Microsoft Azure</div><span class="st" id="azureSt"></span></div>'
+        + '<div class="conn-msg" id="azureMsg">Verifico stato…</div>'
+        + '<div class="conn-actions" id="azureActions"></div>'
+        + '</div>'
+        + '<div class="conn-block" id="connAws">'
+        + '<div class="conn-hd"><div class="ci">🟠</div><div class="cn">Amazon Web Services</div><span class="st" id="awsSt"></span></div>'
+        + '<div class="conn-msg" id="awsMsg">Verifico stato…</div>'
+        + '<div class="conn-actions" id="awsActions"></div>'
+        + '</div>'
+        + '<div class="conn-block" id="connGcp">'
+        + '<div class="conn-hd"><div class="ci">🔵</div><div class="cn">Google Cloud Platform</div><span class="st" id="gcpSt"></span></div>'
+        + '<div class="conn-msg" id="gcpMsg">Verifico stato…</div>'
+        + '<div class="conn-actions" id="gcpActions"></div>'
+        + '</div>'
+        + '</div>'
+
+        + '<div class="set-section">'
+        + '<div class="set-section-hd">'
+        + '<div class="ic">🛠️</div>'
+        + '<div class="ttl"><h4>DevOps</h4>'
+        + '<p>Servizi per pipeline, codice e automazione.</p>'
+        + '</div>'
+        + '</div>'
+        + '<div class="conn-block" id="connGithub">'
+        + '<div class="conn-hd"><div class="ci">🐙</div><div class="cn">GitHub</div><span class="st" id="githubSt"></span></div>'
+        + '<div class="conn-msg" id="githubMsg">Verifico stato…</div>'
+        + '<div class="conn-actions" id="githubActions"></div>'
+        + '</div>'
+        + '<div class="conn-block" id="connAzdo">'
+        + '<div class="conn-hd"><div class="ci">🔷</div><div class="cn">Azure DevOps</div><span class="st" id="azdoSt"></span></div>'
+        + '<div class="conn-msg" id="azdoMsg">Verifico stato…</div>'
+        + '<div class="conn-actions" id="azdoActions"></div>'
+        + '</div>'
+        + '</div>'
+
+        + '<div class="set-section">'
+        + '<div class="set-section-hd">'
+        + '<div class="ic">🌀</div>'
+        + '<div class="ttl"><h4>Orchestratori</h4>'
+        + '<p>Servizi che orchestranno i tuoi workflow. Airflow è il primo supportato: gestisce DAG, pipeline e task schedulati.</p>'
+        + '</div>'
+        + '</div>'
+        + '<div class="conn-block" id="connAirflow">'
+        + '<div class="conn-hd"><div class="ci">🌀</div><div class="cn">Apache Airflow</div><span class="st" id="airflowSt"></span></div>'
+        + '<div class="conn-msg" id="airflowMsg">Verifico stato…</div>'
+        + '<div class="conn-actions" id="airflowActions"></div>'
+        + '</div>'
+        + '<div class="set-empty" style="margin-top:6px">'
+        + 'Altri orchestratori (Prefect, Dagster, Temporal, …) saranno disponibili prossimamente.'
+        + '</div>'
+        + '</div>';
+
+      $("#llmSectionBody").innerHTML = renderLLMSection(side);
+      const addBtn = $("#llmAddBtn");
+      if (addBtn) addBtn.onclick = () => openLLMModal();
+      side.querySelectorAll('[data-act]').forEach(btn => {
+        const act = btn.dataset.act;
+        const provider = btn.dataset.provider;
+        btn.onclick = async () => {
+          if (act === "primary") return llmSetPrimary(provider);
+          if (act === "edit") {
+            const cfg = getLLMProvidersConfig().find(p => p.provider === provider);
+            return openLLMModal({ editProvider: cfg });
+          }
+          if (act === "delete") {
+            if (confirm('Rimuovere il provider "' + provider + '"? La chiave salvata verrà cancellata.')) {
+              return llmDelete(provider);
+            }
+          }
+        };
+      });
+
+      const conn = AppState.connections || {};
+      renderAzureStatus(conn.azure);
+      renderGithubStatus(conn.github, conn.github_configured);
+      renderGcpStatus(conn.gcp, conn.gcp_configured);
+      renderAwsStatus(conn.aws);
+      renderAzdoStatus(conn.azdo);
+      renderAirflowStatus(conn.airflow);
+    }
+
+    /* =========================================================
+       TOOLS / HISTORY
+       ========================================================= */
+    const TOOLS_DOMAIN_IT = {
+      adf: "Data Factory", blob: "Storage · Blob", sql: "SQL", table: "Storage · Table",
+      queue: "Storage · Queue", fileshare: "File share", resource: "Resource / risorse", network: "Rete",
+      keyvault: "Key Vault", rbac: "Permessi (RBAC)", lock: "Lock di governance", iac: "Terraform (IaC)",
+      cicd: "Pipeline CI/CD", github: "GitHub", docs: "Documentazione", naming: "Naming",
+      feasibility: "Fattibilità", remediation: "Remediation", meta: "Auto-estensione", files: "File allegati",
+      airflow: "Airflow"
+    };
+    function renderTools(side, t) {
+      const tools = t.tools || [];
+      const byDom = {};
+      tools.forEach(x => { (byDom[x.domain] = byDom[x.domain] || []).push(x); });
+      const doms = Object.keys(byDom).sort();
+      const nPlugin = tools.filter(x => x.plugin).length;
+      let html = `<div class="card"><h3>Catalogo tool (${t.total})</h3>`
+        + `<div class="toolsum">${t.total - nPlugin} nativi · ${nPlugin} aggiuntivi (runtime)</div>`
+        + `<input id="toolsearch" type="search" placeholder="🔎 Filtra i tool…" autocomplete="off"></div>`;
+      for (const dom of doms) {
+        const list = byDom[dom].slice().sort((a, b) => a.name.localeCompare(b.name));
+        const label = TOOLS_DOMAIN_IT[dom] || dom;
+        html += `<div class="card tooldom"><h3>${esc(label)} <span class="cnt">${list.length}</span></h3>`;
+        html += list.map(x => {
+          const tags = (x.write ? '<span class="pill w">scrittura</span>' : '<span class="pill r">lettura</span>')
+            + (x.plugin ? '<span class="pill p">runtime</span>' : '');
+          return `<div class="toolrow" data-k="${esc((x.name + ' ' + x.doc).toLowerCase())}">`
+            + `<div class="toolhd"><code>${esc(x.name)}</code>${tags}</div>`
+            + (x.doc ? `<div class="tooldoc">${esc(x.doc)}</div>` : ``) + `</div>`;
+        }).join("");
+        html += `</div>`;
+      }
+      side.innerHTML = html;
+      const ts = document.getElementById("toolsearch");
+      if (ts) {
+        ts.oninput = () => {
+          const q = ts.value.trim().toLowerCase();
+          side.querySelectorAll(".toolrow").forEach(r => {
+            r.style.display = (!q || r.dataset.k.includes(q)) ? "" : "none";
+          });
+          side.querySelectorAll(".tooldom").forEach(dc => {
+            const any = Array.from(dc.querySelectorAll(".toolrow")).some(r => r.style.display !== "none");
+            dc.style.display = any ? "" : "none";
+          });
+        };
+      }
+    }
+    function renderHistory(side, d) {
+      const m = d.messages || [];
+      if (!m.length) {
+        side.innerHTML = '<div class="card"><h3>Storico</h3><div class="empty">Sessione vuota.</div></div>';
+        return;
+      }
+      const rows = m.map(x => {
+        const who = x.role === "user" ? "👤" : "🤖";
+        return `<div style="padding:8px 0;border-bottom:1px solid var(--border)">`
+          + `<div style="color:var(--muted);font-size:11px">${who} ${esc(x.role)}</div>`
+          + `<div style="white-space:pre-wrap">${esc((x.content || "").slice(0, 600))}</div></div>`;
+      }).join("");
+      side.innerHTML = `<div class="card"><h3>Storico conversazione (${m.length})</h3>${rows}</div>`;
+    }
+
+    /* =========================================================
+       INIT
+       ========================================================= */
+    (async () => {
+      await window.hemmyReady;
+      await refreshMe();
+      await refreshConnectStatus();
+      await loadProviderCatalog();
+      loadHistory();
+      setView("chat");
+      setStatus("idle");
+      if (!AppState.hasAnyLLMKey) updateOnboardingUI();
+    })();
+  </script>
+</body>
+
+</html>

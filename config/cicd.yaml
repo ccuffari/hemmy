@@ -1,0 +1,26 @@
+# Configurazione CI/CD — provider selezionabile.
+# I segreti (token/PAT) NON vanno qui: GitHub via 'gh auth login', ADO via AZDO_PAT env.
+
+provider: github          # github | azure_devops
+iac_dir: infra            # directory Terraform nel repo
+
+# Autenticazione della pipeline verso Azure:
+#   secret : usa ARM_CLIENT_SECRET (secret nel repo)
+#   oidc   : Workload Identity Federation — NESSUN client secret (consigliato).
+#            Prepara la federazione con cicd.generate_oidc_federation.
+auth: secret              # secret | oidc
+
+# Ambienti: una pipeline DEDICATA per ciascuno (dev = base; uat/prod su richiesta).
+environments:
+  - dev
+  - uat
+  - prod
+
+github:
+  repo: ""                # "owner/repo" (oppure via env GITHUB_REPO)
+  branch: main
+
+azure_devops:
+  organization: ""        # oppure via env AZDO_ORG
+  project: ""             # oppure via env AZDO_PROJECT
+  pipeline_id: ""         # id numerico della pipeline (o env AZDO_PIPELINE_ID)
