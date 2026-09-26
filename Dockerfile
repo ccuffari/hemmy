@@ -50,7 +50,15 @@ RUN useradd --create-home --uid 1000 hemmy \
 USER hemmy
 
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    HEMMY_PROJECT_ROOT=/app
+# OBBLIGATORIA qui: il pacchetto è installato in modo NON editable (pip
+# install .), quindi vive sotto site-packages — una gerarchia disgiunta da
+# dove stanno config/data/logs (copiati a fianco in /app). Senza questa env
+# var, `Path(__file__).resolve().parents[N]` risale nell'albero SBAGLIATO
+# (es. /usr/local/lib/python3.11) e ogni lettura di config/agent.yaml fallisce
+# silenziosamente — bug reale osservato: nessun provider LLM risolvibile per
+# nessun utente, storico/tool vuoti in UI senza alcun errore visibile.
 
 # Cloud Run inietta PORT (default locale 8080 se non specificato altrove);
 # `hemmy.interfaces.web.serve()` legge PORT/HOST dall'ambiente (HOST default

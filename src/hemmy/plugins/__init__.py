@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import importlib
 import importlib.util
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -40,8 +41,13 @@ from typing import Any
 # anche in caso di un futuro bug di path handling, un tool generato non può
 # fisicamente atterrare accanto al codice reale dell'agente.
 _PACKAGE_DIR = Path(__file__).resolve().parent  # src/hemmy/plugins/ (sorgente)
-_NATIVE_DIR = _PACKAGE_DIR.parent / "native_plugins"
-_PROJECT_ROOT = _PACKAGE_DIR.resolve().parents[2]  # .../adf-agent (fuori da src/)
+_NATIVE_DIR = _PACKAGE_DIR.parent / "native_plugins"  # dentro il pacchetto: ok in ogni install
+# `parents[2]` funziona SOLO con install editable (pip install -e .): in un
+# install normale (produzione) il pacchetto vive sotto site-packages, una
+# gerarchia disgiunta da dove sta `data/` — nessun `parents[N]` la trova.
+# `HEMMY_PROJECT_ROOT` (impostata dal Dockerfile) è la fonte di verità lì.
+_env_root = os.environ.get("HEMMY_PROJECT_ROOT")
+_PROJECT_ROOT = Path(_env_root) if _env_root else _PACKAGE_DIR.resolve().parents[2]
 _RUNTIME_PLUGINS_DIR = _PROJECT_ROOT / "data" / "plugins"
 _NAME_RE = re.compile(r"^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$")
 

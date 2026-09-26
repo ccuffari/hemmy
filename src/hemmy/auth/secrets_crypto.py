@@ -21,14 +21,18 @@ from pathlib import Path
 
 
 def _default_local_path() -> Path:
-    # Ancorato alla project root (src/hemmy/auth/secrets_crypto.py -> parents[3]),
-    # MAI un percorso relativo bare: quello dipende dalla cwd del processo che
-    # importa questo modulo (uno script lanciato da un'altra cartella, un test,
-    # un cwd diverso in un container) e può silenziosamente far nascere/leggere
-    # la master key in un posto diverso ogni volta — bug osservato in pratica:
-    # un file "vagante" `src/hemmy/config/.master.key`, mai gitignored, quasi
-    # finito in un commit perché nessuno si aspettava che esistesse lì.
-    return Path(__file__).resolve().parents[3] / "config" / ".master.key"
+    # Ancorato alla project root, MAI un percorso relativo bare (quello
+    # dipende dalla cwd del processo — bug osservato in pratica: un file
+    # "vagante" `src/hemmy/config/.master.key`) e MAI solo `parents[3]` da
+    # questo file (funziona solo con install editable; con un install
+    # normale — quello di produzione — il pacchetto vive sotto
+    # site-packages, tutt'altra gerarchia rispetto a dove sta `config/`).
+    # `HEMMY_PROJECT_ROOT` (impostata dal Dockerfile) è la fonte di verità
+    # in un container; in produzione comunque questo path non dovrebbe mai
+    # essere raggiunto, perché lì `SECRETS_MASTER_KEY` è sempre impostata.
+    env_root = os.environ.get("HEMMY_PROJECT_ROOT")
+    root = Path(env_root) if env_root else Path(__file__).resolve().parents[3]
+    return root / "config" / ".master.key"
 
 
 def load_master_key(local_path: str | None = None) -> bytes:

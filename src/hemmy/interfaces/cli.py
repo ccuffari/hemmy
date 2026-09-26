@@ -16,7 +16,35 @@ import sys
 
 import yaml
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
+def _resolve_project_root() -> Path:
+    """Cartella che contiene `config/`, `data/`, `logs/`, `docs/`, `infra/`.
+
+    1. `HEMMY_PROJECT_ROOT` (env var) — SEMPRE presente in un container
+       (impostata dal Dockerfile a `/app`): OBBLIGATORIA lì perché
+       `Path(__file__).resolve().parents[3]` NON può funzionare in un
+       install non-editable (`pip install .`, quello usato in produzione).
+       In quel caso il pacchetto finisce sotto
+       `.../site-packages/hemmy/interfaces/cli.py`: risalendo di 3 livelli
+       si arriva a `.../site-packages/../..` (es. `/usr/local/lib/python3.11`),
+       una cartella COMPLETAMENTE ESTRANEA a dove sta `config/` — non è un
+       problema di "conteggio sbagliato", è che le due gerarchie (codice
+       installato vs. config/data copiati a fianco) sono semplicemente
+       DISGIUNTE in un container: nessun `parents[N]` può ricongiungerle.
+       Bug reale osservato in produzione: `resolve_llm_config` falliva per
+       ogni utente con `FileNotFoundError: config/agent.yaml` risolto contro
+       `/usr/local/lib/python3.11/config/agent.yaml`.
+    2. Fallback: `parents[3]` da questo file (`src/hemmy/interfaces/cli.py`),
+       valido SOLO con un install editable (`pip install -e .`, quello dello
+       sviluppo locale), dove Python importa il pacchetto direttamente dalla
+       sua posizione reale sotto `src/`.
+    """
+    env_root = os.environ.get("HEMMY_PROJECT_ROOT")
+    if env_root:
+        return Path(env_root)
+    return Path(__file__).resolve().parents[3]
+
+
+PROJECT_ROOT = _resolve_project_root()
 CONFIG_DIR = PROJECT_ROOT / "config"
 AUDIT_PATH = str(PROJECT_ROOT / "logs" / "audit.log")
 SESSION_PATH = PROJECT_ROOT / ".session.json"
