@@ -743,6 +743,10 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Backend su servizio Cloud Run separato dal frontend (URL diverso):
+       senza questo, config.js userebbe location.origin, cioè punterebbe al
+       frontend stesso. Da aggiornare se si mappa un dominio custom. -->
+  <script>window.HEMMY_API_BASE = "https://hemmy-backend-zjrvfn2m7a-ew.a.run.app";</script>
   <script src="config.js"></script>
   <script>
     /* ============================================================
