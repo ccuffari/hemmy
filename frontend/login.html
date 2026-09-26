@@ -621,7 +621,8 @@
           <!-- <button id="tabRegister" type="button">Registrati</button> -->
         </div>
 
-        <form id="form" autocomplete="on" novalidate>
+        <form id="form" autocomplete="on" novalidate method="post" action="javascript:void(0)"
+          onsubmit="return false">
           <!-- Campi solo registrazione -->
           <div id="registerFields" class="hidden">
             <label for="u">Username <span class="req">*</span></label>
@@ -866,7 +867,7 @@
     function setMode(m) {
       mode = m;
       tabLogin.classList.toggle("active", m === "login");
-      tabRegister.classList.toggle("active", m === "register");
+      if (tabRegister) tabRegister.classList.toggle("active", m === "register");
       submitBtn.textContent = m === "login" ? "Accedi" : "Crea account";
       pwd.autocomplete = m === "login" ? "current-password" : "new-password";
       registerFields.classList.toggle("hidden", m !== "register");
@@ -879,7 +880,7 @@
       clearMsg();
     }
     tabLogin.onclick = () => setMode("login");
-    tabRegister.onclick = () => setMode("register");
+    if (tabRegister) tabRegister.onclick = () => setMode("register");
 
     // --- Se già loggato, vai diretto all'app ---
     (async () => {
